@@ -1,0 +1,58 @@
+@namespace DNF.Projects
+@inherits ModuleBase
+@inject ISettingService SettingService
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <label for="Username" class="control-label">Github Username: </label>
+        </td>
+        <td>
+            <input type="text" class="form-control" @bind="_username" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="Username" class="control-label">Github Password: </label>
+        </td>
+        <td>
+            <input type="password" class="form-control" @bind="_password" />
+        </td>
+    </tr>
+</table>
+
+@code {
+    public override string Title => "Project Settings";
+
+    string _username;
+    string _password;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            _username = SettingService.GetSetting(settings, "GithubUsername", "");
+            _password = SettingService.GetSetting(settings, "GithubPassword", "");
+        }
+        catch (Exception ex)
+        {
+            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+        }
+    }
+
+    public async Task UpdateSettings()
+    {
+        try
+        {
+            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            SettingService.SetSetting(settings, "GithubUsername", _username);
+            SettingService.SetSetting(settings, "GithubPassword", _password);
+            await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+        }
+    }
+}

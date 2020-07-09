@@ -1,0 +1,146 @@
+@using DNF.Projects.Services
+@using DNF.Projects.Models
+@using DNF.Projects.Shared
+
+@namespace DNF.Projects
+@inherits ModuleBase
+@inject IProjectService ProjectService
+@inject NavigationManager NavigationManager
+
+<div class="DNF-Projects-View">
+@if (_ProjectActivity != null)
+{
+    <h2 class="text-center">@_name</h2>
+    <table class="table table-borderless header">
+        <tr>
+            <td>From: </td>
+            <td><input id="from" class="form-control" @bind="@_from" /></td>
+            <td>To: </td>
+            <td><input id="to" class="form-control" @bind="@_to" /></td>
+            <td><button type="button" class="btn btn-primary" @onclick="Display">Display</button></td>
+        </tr>
+    </table>
+    <br />
+    <div id="chart"></div>
+    <br />
+    <br />
+    <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)">
+        <Header>
+            <th>Date</th>
+            <th>Watchers</th>
+            <th>Stars</th>
+            <th>Forks</th>
+            <th>Contributors</th>
+            <th>Commits</th>
+            <th>Issues</th>
+            <th>PRs</th>
+        </Header>
+        <Row>
+            <td>@(context.Date.ToString("MMM-dd-yyyy"))</td>
+            <td>@(context.Watchers)</td>
+            <td>@(context.Stars)</td>
+            <td>@(context.Forks)</td>
+            <td>@(context.Contributors)</td>
+            <td>@(context.Commits)</td>
+            <td>@(context.Issues)</td>
+            <td>@(context.PullRequests)</td>
+        </Row>
+    </Pager>
+}
+else
+{
+    <p>No Project Activity To Display</p>
+}
+</div>
+
+@code {
+    List<ProjectActivity> _ProjectActivity;
+    int _id;
+    string _name;
+    string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
+    string _to = DateTime.Now.ToString("MMM-dd-yyyy");
+
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Bundle = "ChartJS", Url = "https://cdn.jsdelivr.net/npm/chart.js@2.8.0" },
+        new Resource { ResourceType = ResourceType.Script, Bundle = "ChartJS", Url = ModulePath() + "Module.js" }
+    };
+
+    public override string Title => "Project Trends";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (PageState.QueryString.ContainsKey("from"))
+            {
+                _from = PageState.QueryString["from"];
+            }
+            if (PageState.QueryString.ContainsKey("to"))
+            {
+                _to = PageState.QueryString["to"];
+            }
+
+            _id = Int32.Parse(PageState.QueryString["id"]);
+            var project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
+            if (project != null)
+            {
+                _name = project.Url.Replace(Common.UrlPrefix, "");
+                await Display();
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Project Activity {Error}", ex.Message);
+            AddModuleMessage("Error Loading Project Activity", MessageType.Error);
+        }
+    }
+
+    private async Task Display()
+    {
+        _ProjectActivity = await ProjectService.GetProjectActivityAsync(_id, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (!firstRender && _ProjectActivity != null)
+        {
+            string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests" };
+            string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF" };
+
+            // pivot data for chart
+            List<string> labels = new List<string>();
+            Dictionary<string, List<int>> data = new Dictionary<string, List<int>>();
+            foreach (string metric in metrics)
+            {
+                data.Add(metric, new List<int>());
+            }
+            foreach (var activity in _ProjectActivity)
+            {
+                labels.Add(activity.Date.ToShortDateString());
+                data["Watchers"].Add(activity.Watchers);
+                data["Stars"].Add(activity.Stars);
+                data["Forks"].Add(activity.Forks);
+                data["Contributors"].Add(activity.Contributors);
+                data["Commits"].Add(activity.Commits);
+                data["Issues"].Add(activity.Issues);
+                data["PullRequests"].Add(activity.PullRequests);
+            }
+
+            int index = -1;
+            List<object> datasets = new List<object>();
+            foreach (var item in data)
+            {
+                index += 1;
+                datasets.Add(new { label = item.Key, data = item.Value.ToArray(), fill = false, borderColor = colors[index] });
+            }
+            object options = new object();
+
+            var interop = new Interop(JSRuntime);
+            await interop.CreateChart("chart", "line", labels.ToArray(), datasets.ToArray(), options);
+        }
+    }
+}

@@ -1,0 +1,55 @@
+@using DNF.Projects.Services
+@using DNF.Projects.Models
+@using DNF.Projects.Shared
+
+@namespace DNF.Projects
+@inherits ModuleBase
+@inject IProjectService ProjectService
+@inject NavigationManager NavigationManager
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <label class="control-label">Github Url: </label>
+        </td>
+        <td>
+            <input id="_url" class="form-control" @bind="@_url" />
+        </td>
+    </tr>
+</table>
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+
+@code {
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    string _url;
+
+    private async Task Save()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
+            {
+                Project Project = new Project();
+                Project.ModuleId = ModuleState.ModuleId;
+                Project.SiteId = ModuleState.SiteId;
+                Project.Url = _url;
+                Project = await ProjectService.AddProjectAsync(Project);
+                await logger.LogInformation("Project Added {Project}", Project);
+                NavigationManager.NavigateTo(NavigateUrl());
+            }
+            else
+            {
+                AddModuleMessage("You Need To Provide A Github Url", MessageType.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Adding Project {Error}", ex.Message);
+            AddModuleMessage("Error Adding Project", MessageType.Error);
+        }
+    }
+}

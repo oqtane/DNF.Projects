@@ -1,0 +1,177 @@
+@using Oqtane.Modules.Controls
+@using DNF.Projects.Services
+@using DNF.Projects.Models
+@using DNF.Projects.Shared 
+
+@namespace DNF.Projects
+@inherits ModuleBase
+@inject IProjectService ProjectService
+@inject NavigationManager NavigationManager
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <label class="control-label">Github Url: </label>
+        </td>
+        <td>
+            <input id="_url" class="form-control" @bind="@_url" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Date: </label>
+        </td>
+        <td>
+            <input id="_date" class="form-control" @bind="@_date" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Watchers: </label>
+        </td>
+        <td>
+            <input id="_watchers" class="form-control" @bind="@_watchers" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Stars: </label>
+        </td>
+        <td>
+            <input id="_stars" class="form-control" @bind="@_stars" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Forks: </label>
+        </td>
+        <td>
+            <input id="_forks" class="form-control" @bind="@_forks" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Contributors: </label>
+        </td>
+        <td>
+            <input id="_contributors" class="form-control" @bind="@_contributors" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Commits: </label>
+        </td>
+        <td>
+            <input id="_commits" class="form-control" @bind="@_commits" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Issues: </label>
+        </td>
+        <td>
+            <input id="_issues" class="form-control" @bind="@_issues" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="control-label">Pull Requests: </label>
+        </td>
+        <td>
+            <input id="_pullrequests" class="form-control" @bind="@_pullrequests" />
+        </td>
+    </tr>
+</table>
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+
+@code {
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Title => "Project Activity";
+
+    int _id;
+    string _url;
+    string _date;
+    string _watchers;
+    string _stars;
+    string _forks;
+    string _contributors;
+    string _commits;
+    string _issues;
+    string _pullrequests;
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _id = Int32.Parse(PageState.QueryString["id"]);
+            Project Project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
+            if (Project != null)
+            {
+                _url = Project.Url;
+                _createdby = Project.CreatedBy;
+                _createdon = Project.CreatedOn;
+                _modifiedby = Project.ModifiedBy;
+                _modifiedon = Project.ModifiedOn;
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Project {ProjectId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading Project", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            Project Project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
+            if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
+            {
+                if (Project.Url != _url)
+                {
+                    Project.Url = _url;
+                    await ProjectService.UpdateProjectAsync(Project);
+                    await logger.LogInformation("Project Updated {Project}", Project);
+                }
+
+                DateTime date;
+                if (!string.IsNullOrEmpty(_date) && DateTime.TryParse(_date, out date))
+                {
+                    var activity = new ProjectActivity();
+                    activity.ProjectId = Project.ProjectId;
+                    activity.Date = date;
+                    activity.Watchers = (string.IsNullOrEmpty(_watchers) ? 0 : int.Parse(_watchers));
+                    activity.Stars = (string.IsNullOrEmpty(_stars) ? 0 : int.Parse(_stars));
+                    activity.Forks = (string.IsNullOrEmpty(_forks) ? 0 : int.Parse(_forks));
+                    activity.Contributors = (string.IsNullOrEmpty(_contributors) ? 0 : int.Parse(_contributors));
+                    activity.Commits = (string.IsNullOrEmpty(_commits) ? 0 : int.Parse(_commits));
+                    activity.Issues = (string.IsNullOrEmpty(_issues) ? 0 : int.Parse(_issues));
+                    activity.PullRequests = (string.IsNullOrEmpty(_pullrequests) ? 0 : int.Parse(_pullrequests));
+                    await ProjectService.AddProjectActivityAsync(activity, ModuleState.ModuleId);
+                    await logger.LogInformation("Project Activity Added {ProjectActivity}", activity);
+                }
+
+                AddModuleMessage("Project Saved", MessageType.Success);
+            }
+            else
+            {
+                AddModuleMessage("You Need To Provide A Github Url", MessageType.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Project {Error}", ex.Message);
+            AddModuleMessage("Error Saving Project", MessageType.Error);
+        }
+    }
+}
