@@ -8,6 +8,6 @@ A video tutorial was recorded which explains the various aspects of this module:
 
 Example Screen Shots:
 
-![Module](https://github.com/oqtane/dnf.projects/blob/master/screenshot1.png?raw=true "Bar Chart")
+![Module](https://github.com/oqtane/dnf.projects/blob/master/Screenshot1.png?raw=true "Bar Chart")
 
-![Module](https://github.com/oqtane/dnf.projects/blob/master/screenshot2.png?raw=true "Line Chart")
+![Module](https://github.com/oqtane/dnf.projects/blob/master/Screenshot2.png?raw=true "Line Chart")
