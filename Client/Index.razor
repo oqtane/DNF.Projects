@@ -76,6 +76,7 @@
     string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
     string _metric = "Stars";
+    bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -153,6 +154,8 @@
                         break;
                 }
             }
+            _refresh = true;
+            StateHasChanged();
         }
     }
 
@@ -160,7 +163,7 @@
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        if (!firstRender && _Projects != null)
+        if ((firstRender || _refresh) && _Projects != null)
         {
             List<string> labels = new List<string>();
             List<int> values = new List<int>();
@@ -200,6 +203,8 @@
 
             var interop = new Interop(JSRuntime);
             await interop.CreateChart("chart", "bar", labels.ToArray(), datasets.ToArray(), options);
+
+            _refresh = false;
         }
     }
 

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace DNF.Projects.Controllers
 {
-    [Route("{site}/api/[controller]")]
+    [Route("{alias}/api/[controller]")]
     public class ProjectController : Controller
     {
         private readonly IProjectRepository _Projects;
