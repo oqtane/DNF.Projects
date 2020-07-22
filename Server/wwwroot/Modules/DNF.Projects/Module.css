@@ -6,10 +6,14 @@
 
 .DNF-Projects-Index .header {
     margin: auto;
-    width: 85% !important;
+    width: 90% !important;
 }
 
 .DNF-Projects-View .header {
     margin: auto;
     width: 50% !important;
+}
+
+.DNF-Projects-View .chart {
+    height: 400px;
 }

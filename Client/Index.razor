@@ -8,9 +8,9 @@
 @inject NavigationManager NavigationManager
 
 <div class="DNF-Projects-Index">
-    @if (@_Projects != null && @_Projects.Count > 0)
+    @if (_initialized && _Projects.Count > 0)
     {
-        <h2 class="text-center">Top Projects</h2><br />
+        <h2 class="text-center">Highest Growth Projects</h2><br />
         <table class="table table-borderless header">
             <tr>
                 <td>From: </td>
@@ -32,13 +32,14 @@
                 <td><button type="button" class="btn btn-primary" @onclick="Display">Display</button></td>
             </tr>
         </table>
+        <br />
         <div id="chart" class="chart"></div>
         <br />
     }
 
     <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
 
-    @if (@_Projects != null && @_Projects.Count > 0)
+    @if (_initialized && _Projects.Count > 0)
     {
         <Pager Items="@_Projects">
             <Header>
@@ -55,9 +56,9 @@
                 <th>PRs</th>
             </Header>
             <Row>
-                <td><ActionLink Action="View" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from + "&to=" + _to)" /></td>
+                <td><ActionLink Action="View" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from + "&to=" + _to)" /></td>
                 <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
-                <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Admin" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
+                <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
                 <td>@((MarkupString)("<a href=\"" + context.Url + "\" target=\"_new\">" + context.Url.Replace(Common.UrlPrefix, "") + "</a>"))</td>
                 <td>@(context.Watchers)</td>
                 <td>@(context.Stars)</td>
@@ -72,6 +73,7 @@
 </div>
 
 @code {
+    bool _initialized = false;
     List<Project> _Projects;
     string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
@@ -91,6 +93,7 @@
         {
             _Projects = await ProjectService.GetProjectsAsync(ModuleState.ModuleId);
             await Display();
+            _initialized = true;
         }
         catch (Exception ex)
         {
@@ -101,110 +104,68 @@
 
     private async Task Display()
     {
-        if (_Projects != null)
+        try
         {
-            List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
-            if (ProjectActivity != null)
+            if (_Projects != null)
             {
-                foreach (var project in _Projects)
+                List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
+                if (ProjectActivity != null)
                 {
-                    project.Watchers = 0;
-                    project.Stars = 0;
-                    project.Forks = 0;
-                    project.Contributors = 0;
-                    project.Commits = 0;
-                    project.Issues = 0;
-                    project.PullRequests = 0;
-
-                    var projectactivity = ProjectActivity.Where(item => item.ProjectId == project.ProjectId);
-                    if (projectactivity.Any())
+                    foreach (var project in _Projects)
                     {
-                        projectactivity = projectactivity.OrderBy(item => item.Date);
-                        project.Watchers = projectactivity.Last().Watchers - projectactivity.First().Watchers;
-                        project.Stars = projectactivity.Last().Stars - projectactivity.First().Stars;
-                        project.Forks = projectactivity.Last().Forks - projectactivity.First().Forks;
-                        project.Contributors = projectactivity.Last().Contributors - projectactivity.First().Contributors;
-                        project.Commits = projectactivity.Last().Commits - projectactivity.First().Commits;
-                        project.Issues = projectactivity.Last().Issues - projectactivity.First().Issues;
-                        project.PullRequests = projectactivity.Last().PullRequests - projectactivity.First().PullRequests;
+                        project.Watchers = 0;
+                        project.Stars = 0;
+                        project.Forks = 0;
+                        project.Contributors = 0;
+                        project.Commits = 0;
+                        project.Issues = 0;
+                        project.PullRequests = 0;
+
+                        var projectactivity = ProjectActivity.Where(item => item.ProjectId == project.ProjectId);
+                        if (projectactivity.Any())
+                        {
+                            projectactivity = projectactivity.OrderBy(item => item.Date);
+                            project.Watchers = projectactivity.Last().Watchers - projectactivity.First().Watchers;
+                            project.Stars = projectactivity.Last().Stars - projectactivity.First().Stars;
+                            project.Forks = projectactivity.Last().Forks - projectactivity.First().Forks;
+                            project.Contributors = projectactivity.Last().Contributors - projectactivity.First().Contributors;
+                            project.Commits = projectactivity.Last().Commits - projectactivity.First().Commits;
+                            project.Issues = projectactivity.Last().Issues - projectactivity.First().Issues;
+                            project.PullRequests = projectactivity.Last().PullRequests - projectactivity.First().PullRequests;
+                        }
+                    }
+                    switch (_metric)
+                    {
+                        case "Watchers":
+                            _Projects = _Projects.OrderByDescending(item => item.Watchers).ToList();
+                            break;
+                        case "Stars":
+                            _Projects = _Projects.OrderByDescending(item => item.Stars).ToList();
+                            break;
+                        case "Forks":
+                            _Projects = _Projects.OrderByDescending(item => item.Forks).ToList();
+                            break;
+                        case "Contributors":
+                            _Projects = _Projects.OrderByDescending(item => item.Contributors).ToList();
+                            break;
+                        case "Commits":
+                            _Projects = _Projects.OrderByDescending(item => item.Commits).ToList();
+                            break;
+                        case "Issues":
+                            _Projects = _Projects.OrderByDescending(item => item.Issues).ToList();
+                            break;
+                        case "PullRequests":
+                            _Projects = _Projects.OrderByDescending(item => item.PullRequests).ToList();
+                            break;
                     }
                 }
-                switch (_metric)
-                {
-                    case "Watchers":
-                        _Projects = _Projects.OrderByDescending(item => item.Watchers).ToList();
-                        break;
-                    case "Stars":
-                        _Projects = _Projects.OrderByDescending(item => item.Stars).ToList();
-                        break;
-                    case "Forks":
-                        _Projects = _Projects.OrderByDescending(item => item.Forks).ToList();
-                        break;
-                    case "Contributors":
-                        _Projects = _Projects.OrderByDescending(item => item.Contributors).ToList();
-                        break;
-                    case "Commits":
-                        _Projects = _Projects.OrderByDescending(item => item.Commits).ToList();
-                        break;
-                    case "Issues":
-                        _Projects = _Projects.OrderByDescending(item => item.Issues).ToList();
-                        break;
-                    case "PullRequests":
-                        _Projects = _Projects.OrderByDescending(item => item.PullRequests).ToList();
-                        break;
-                }
+                _refresh = true;
             }
-            _refresh = true;
-            StateHasChanged();
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if ((firstRender || _refresh) && _Projects != null)
+        catch (Exception ex)
         {
-            List<string> labels = new List<string>();
-            List<int> values = new List<int>();
-            List<object> datasets = new List<object>();
-            string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#000000" };
-
-            for (int i = 0; i < (_Projects.Count < 10 ? _Projects.Count : 10); i++)
-            {
-                labels.Add(_Projects[i].Url.Replace(Common.UrlPrefix, ""));
-                switch (_metric)
-                {
-                    case "Watchers":
-                        values.Add(_Projects[i].Watchers);
-                        break;
-                    case "Stars":
-                        values.Add(_Projects[i].Stars);
-                        break;
-                    case "Forks":
-                        values.Add(_Projects[i].Forks);
-                        break;
-                    case "Contributors":
-                        values.Add(_Projects[i].Contributors);
-                        break;
-                    case "Commits":
-                        values.Add(_Projects[i].Commits);
-                        break;
-                    case "Issues":
-                        values.Add(_Projects[i].Issues);
-                        break;
-                    case "PullRequests":
-                        values.Add(_Projects[i].PullRequests);
-                        break;
-                }
-            }
-            datasets.Add(new { label = _metric, data = values.ToArray(), fill = false, backgroundColor = colors });
-            object options = new { maintainAspectRatio = false, legend = new { display = false }, scales = new { yAxes = new object[] { new { ticks = new { beginAtZero = true } } } } };
-
-            var interop = new Interop(JSRuntime);
-            await interop.CreateChart("chart", "bar", labels.ToArray(), datasets.ToArray(), options);
-
-            _refresh = false;
+            await logger.LogError(ex, "Error Loading Project Activity {Error}", ex.Message);
+            AddModuleMessage("Error Loading Project Activity", MessageType.Error);
         }
     }
 
@@ -221,6 +182,63 @@
         {
             await logger.LogError(ex, "Error Deleting Project {Project} {Error}", Project, ex.Message);
             AddModuleMessage("Error Deleting Project", MessageType.Error);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            await base.OnAfterRenderAsync(firstRender);
+
+            if (_refresh)
+            {
+                List<string> labels = new List<string>();
+                List<int> values = new List<int>();
+                List<object> datasets = new List<object>();
+                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#000000" };
+
+                for (int i = 0; i < (_Projects.Count < 10 ? _Projects.Count : 10); i++)
+                {
+                    labels.Add(_Projects[i].Url.Replace(Common.UrlPrefix, ""));
+                    switch (_metric)
+                    {
+                        case "Watchers":
+                            values.Add(_Projects[i].Watchers);
+                            break;
+                        case "Stars":
+                            values.Add(_Projects[i].Stars);
+                            break;
+                        case "Forks":
+                            values.Add(_Projects[i].Forks);
+                            break;
+                        case "Contributors":
+                            values.Add(_Projects[i].Contributors);
+                            break;
+                        case "Commits":
+                            values.Add(_Projects[i].Commits);
+                            break;
+                        case "Issues":
+                            values.Add(_Projects[i].Issues);
+                            break;
+                        case "PullRequests":
+                            values.Add(_Projects[i].PullRequests);
+                            break;
+                    }
+                }
+                datasets.Add(new { label = _metric, data = values.ToArray(), fill = false, backgroundColor = colors });
+                object options = new { maintainAspectRatio = false, legend = new { display = false }, scales = new { yAxes = new object[] { new { ticks = new { beginAtZero = true } } } } };
+
+                var interop = new Interop(JSRuntime);
+                await interop.CreateChart("chart", "bar", labels.ToArray(), datasets.ToArray(), options);
+
+                _refresh = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Rendering Chart  {Error}", ex.Message);
+            AddModuleMessage("Error Rendering Chart", MessageType.Error);
         }
     }
 }

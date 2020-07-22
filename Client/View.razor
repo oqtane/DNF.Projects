@@ -8,7 +8,7 @@
 @inject NavigationManager NavigationManager
 
 <div class="DNF-Projects-View">
-@if (_ProjectActivity != null)
+@if (_initialized)
 {
     <h2 class="text-center">@_name</h2>
     <table class="table table-borderless header">
@@ -21,7 +21,7 @@
         </tr>
     </table>
     <br />
-    <div id="chart"></div>
+    <div id="chart" class="chart"></div>
     <br />
     <br />
     <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)">
@@ -47,18 +47,16 @@
         </Row>
     </Pager>
 }
-else
-{
-    <p>No Project Activity To Display</p>
-}
 </div>
 
 @code {
+    bool _initialized = false;
     List<ProjectActivity> _ProjectActivity;
     int _id;
     string _name;
     string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
+    bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -88,6 +86,7 @@ else
             {
                 _name = project.Url.Replace(Common.UrlPrefix, "");
                 await Display();
+                _initialized = true;
             }
         }
         catch (Exception ex)
@@ -99,48 +98,72 @@ else
 
     private async Task Display()
     {
-        _ProjectActivity = await ProjectService.GetProjectActivityAsync(_id, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
+        try
+        {
+            _ProjectActivity = await ProjectService.GetProjectActivityAsync(_id, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
+            if (_ProjectActivity.Count > 0)
+            {
+                _ProjectActivity = _ProjectActivity.OrderByDescending(item => item.Date).ToList();
+                _refresh = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Project Activity {Error}", ex.Message);
+            AddModuleMessage("Error Loading Project Activity", MessageType.Error);
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if (!firstRender && _ProjectActivity != null)
+        try
         {
-            string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests" };
-            string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF" };
+            await base.OnAfterRenderAsync(firstRender);
 
-            // pivot data for chart
-            List<string> labels = new List<string>();
-            Dictionary<string, List<int>> data = new Dictionary<string, List<int>>();
-            foreach (string metric in metrics)
+            if (_refresh)
             {
-                data.Add(metric, new List<int>());
-            }
-            foreach (var activity in _ProjectActivity)
-            {
-                labels.Add(activity.Date.ToShortDateString());
-                data["Watchers"].Add(activity.Watchers);
-                data["Stars"].Add(activity.Stars);
-                data["Forks"].Add(activity.Forks);
-                data["Contributors"].Add(activity.Contributors);
-                data["Commits"].Add(activity.Commits);
-                data["Issues"].Add(activity.Issues);
-                data["PullRequests"].Add(activity.PullRequests);
-            }
+                string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests" };
+                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF" };
 
-            int index = -1;
-            List<object> datasets = new List<object>();
-            foreach (var item in data)
-            {
-                index += 1;
-                datasets.Add(new { label = item.Key, data = item.Value.ToArray(), fill = false, borderColor = colors[index] });
-            }
-            object options = new object();
+                // pivot data for chart
+                List<string> labels = new List<string>();
+                Dictionary<string, List<int>> data = new Dictionary<string, List<int>>();
+                foreach (string metric in metrics)
+                {
+                    data.Add(metric, new List<int>());
+                }
+                foreach (var activity in _ProjectActivity.OrderBy(item => item.Date).ToList())
+                {
+                    labels.Add(activity.Date.ToShortDateString());
+                    data["Watchers"].Add(activity.Watchers);
+                    data["Stars"].Add(activity.Stars);
+                    data["Forks"].Add(activity.Forks);
+                    data["Contributors"].Add(activity.Contributors);
+                    data["Commits"].Add(activity.Commits);
+                    data["Issues"].Add(activity.Issues);
+                    data["PullRequests"].Add(activity.PullRequests);
+                }
 
-            var interop = new Interop(JSRuntime);
-            await interop.CreateChart("chart", "line", labels.ToArray(), datasets.ToArray(), options);
+                int index = -1;
+                List<object> datasets = new List<object>();
+                foreach (var item in data)
+                {
+                    index += 1;
+                    datasets.Add(new { label = item.Key, data = item.Value.ToArray(), fill = false, borderColor = colors[index] });
+                }
+                object options = new { maintainAspectRatio = false };
+
+                var interop = new Interop(JSRuntime);
+                await interop.CreateChart("chart", "line", labels.ToArray(), datasets.ToArray(), options);
+
+                _refresh = false;
+            }
         }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Rendering Chart {Error}", ex.Message);
+            AddModuleMessage("Error Rendering Chart", MessageType.Error);
+        }
+
     }
 }
