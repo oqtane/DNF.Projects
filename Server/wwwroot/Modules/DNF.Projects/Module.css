@@ -1,12 +1,17 @@
 ﻿/* Module Custom Styles */
 
-.DNF-Projects-Index .chart {
-    height: 200px;
-}
-
 .DNF-Projects-Index .header {
     margin: auto;
     width: 90% !important;
+}
+
+.DNF-Projects-Index .chart {
+    height: 300px;
+}
+
+.DNF-Projects-Index .search {
+    margin: auto;
+    width: 40% !important;
 }
 
 .DNF-Projects-View .header {
@@ -15,5 +20,6 @@
 }
 
 .DNF-Projects-View .chart {
-    height: 400px;
+    max-width: 800px;
+    margin: 0 auto;
 }

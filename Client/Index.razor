@@ -7,8 +7,8 @@
 @inject IProjectService ProjectService
 @inject NavigationManager NavigationManager
 
-<div class="DNF-Projects-Index">
-    @if (_initialized && _Projects.Count > 0)
+    <div class="DNF-Projects-Index">
+        @if (_initialized && _Projects.Count > 0)
     {
         <h2 class="text-center">Highest Growth Projects</h2><br />
         <table class="table table-borderless header">
@@ -35,11 +35,19 @@
         <br />
         <div id="chart" class="chart"></div>
         <br />
+        <table class="table table-borderless search">
+            <tr>
+                <td>Find: </td>
+                <td><input id="find" class="form-control" @bind="@_find" /></td>
+                <td><button type="button" class="btn btn-primary" @onclick="Display">Search</button></td>
+            </tr>
+        </table>
+        <br />
     }
 
-    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
+        <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
 
-    @if (_initialized && _Projects.Count > 0)
+        @if (_initialized && _Projects.Count > 0)
     {
         <Pager Items="@_Projects">
             <Header>
@@ -70,7 +78,7 @@
             </Row>
         </Pager>
     }
-</div>
+    </div>
 
 @code {
     bool _initialized = false;
@@ -78,6 +86,7 @@
     string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
     string _metric = "Stars";
+    string _find = "";
     bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -91,7 +100,6 @@
     {
         try
         {
-            _Projects = await ProjectService.GetProjectsAsync(ModuleState.ModuleId);
             await Display();
             _initialized = true;
         }
@@ -106,6 +114,11 @@
     {
         try
         {
+            _Projects = await ProjectService.GetProjectsAsync(ModuleState.ModuleId);
+            if (!string.IsNullOrEmpty(_find))
+            {
+                _Projects = _Projects.Where(item => item.Url.Contains(_find)).ToList();
+            }
             if (_Projects != null)
             {
                 List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
@@ -196,7 +209,7 @@
                 List<string> labels = new List<string>();
                 List<int> values = new List<int>();
                 List<object> datasets = new List<object>();
-                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#000000" };
+                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#CCCCCC" };
 
                 for (int i = 0; i < (_Projects.Count < 10 ? _Projects.Count : 10); i++)
                 {

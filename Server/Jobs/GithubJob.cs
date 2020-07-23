@@ -103,7 +103,7 @@ namespace DNF.Projects.Jobs
                             }
                             catch (Exception ex)
                             {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " Content: " + response.Content;
+                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                             }
 
                             // get contributors, commits
@@ -132,7 +132,7 @@ namespace DNF.Projects.Jobs
                             }
                             catch (Exception ex)
                             {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " Content: " + response.Content;
+                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                             }
 
                             // get issues
@@ -152,7 +152,7 @@ namespace DNF.Projects.Jobs
                             }
                             catch (Exception ex)
                             {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " Content: " + response.Content;
+                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                             }
 
                             // get pull requests
@@ -172,7 +172,7 @@ namespace DNF.Projects.Jobs
                             }
                             catch (Exception ex)
                             {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " Content: " + response.Content;
+                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                             }
 
                             projectRepository.AddProjectActivity(activity);

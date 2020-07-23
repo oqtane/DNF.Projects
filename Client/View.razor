@@ -151,7 +151,7 @@
                     index += 1;
                     datasets.Add(new { label = item.Key, data = item.Value.ToArray(), fill = false, borderColor = colors[index] });
                 }
-                object options = new { maintainAspectRatio = false };
+                object options = new {};
 
                 var interop = new Interop(JSRuntime);
                 await interop.CreateChart("chart", "line", labels.ToArray(), datasets.ToArray(), options);
