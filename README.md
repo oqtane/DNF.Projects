@@ -1,10 +1,14 @@
 # DNF.Projects Module
 
-A sample module which tracks Github metrics for projects. It includes examples of how to use scheduled jobs, third party assemblies, third party JavaScript libraries, etc...
+A sample module which tracks Github metrics for projects. It includes examples of how to use scheduled jobs, third party assemblies, JavaScript libraries, etc...
 
 A series of video tutorials was recorded which explains the various aspects of this module:
 
 [Oqtane Module Development Series](https://www.youtube.com/playlist?list=PLYhXmd7yV0elLNLfQwZBUlM7ZSMYPTZ_f)
+
+You can interact with a live demonstration of the module here:
+
+[.NET Foundation Project Activity](https://dnfprojects.azurewebsites.net/)
 
 Example Screen Shots:
 
