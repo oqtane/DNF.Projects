@@ -24,7 +24,7 @@ namespace DNF.Projects.Jobs
 
         public override string ExecuteJob(IServiceProvider provider)
         {
-            string log = "GithubJob Started: " + DateTime.Now.ToString() + "<br />";
+            string log = "";
 
             // get only aliases for unique tenants
             var aliasRepository = provider.GetRequiredService<IAliasRepository>();
@@ -187,8 +187,6 @@ namespace DNF.Projects.Jobs
                     }
                 }
             }
-
-            log += "GithubJob Finished: " + DateTime.Now.ToString();
 
             return log;
         }
