@@ -25,28 +25,17 @@ namespace DNF.Projects.Jobs
         public override string ExecuteJob(IServiceProvider provider)
         {
             string log = "";
-
-            // get only aliases for unique tenants
-            var aliasRepository = provider.GetRequiredService<IAliasRepository>();
-            List<Alias> aliases = aliasRepository.GetAliases().ToList();
-            HashSet<int> tenants = new HashSet<int>();
-            for (int i = aliases.Count - 1; i >= 0; i--)
-            {
-                if (!tenants.Contains(aliases[i].TenantId))
-                {
-                    tenants.Add(aliases[i].TenantId);
-                }
-                else
-                {
-                    aliases.RemoveAt(i);
-                }
-            }
-
             int searchrequests = 0;
 
-            // iterate through aliases in this installation
+            // iterate through tenants in this installation
+            List<int> tenants = new List<int>();
+            var aliasRepository = provider.GetRequiredService<IAliasRepository>();
+            List<Alias> aliases = aliasRepository.GetAliases().ToList();
             foreach (Alias alias in aliases)
             {
+                if (tenants.Contains(alias.TenantId)) continue;
+                tenants.Add(alias.TenantId);
+
                 // use the SiteState to set the Alias explicitly so the tenant can be resolved
                 var siteState = provider.GetRequiredService<SiteState>();
                 siteState.Alias = alias;
@@ -56,7 +45,7 @@ namespace DNF.Projects.Jobs
                 var settingRepository = provider.GetRequiredService<ISettingRepository>();
                 var projectRepository = provider.GetRequiredService<IProjectRepository>();
 
-                // iterate through sites 
+                // iterate through sites for this tenant
                 List<Site> sites = siteRepository.GetSites().ToList();
                 foreach (Site site in sites)
                 {
