@@ -10,7 +10,6 @@
     <div class="DNF-Projects-Index">
         @if (_initialized && _Projects.Count > 0)
     {
-        <h2 class="text-center">Highest Growth Projects</h2><br />
         <table class="table table-borderless header">
             <tr>
                 <td>From: </td>
@@ -85,7 +84,7 @@
     List<Project> _Projects;
     string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
-    string _metric = "Stars";
+    string _metric = "PullRequests";
     string _find = "";
     bool _refresh = false;
 
