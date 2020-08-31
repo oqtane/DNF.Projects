@@ -57,7 +57,7 @@ namespace DNF.Projects.Jobs
                         // get module settings
                         List<Setting> modulesettings = settingRepository.GetSettings(EntityNames.Module, project.ModuleId).ToList();
                         Dictionary<string, string> settings = GetSettings(modulesettings);
-                        if (settings.ContainsKey("GithubUsername") && settings.ContainsKey("GithubPassword"))
+                        if (settings.ContainsKey("GithubToken"))
                         {
                             // search rate limit ( 30 requests per minute )
                             if (searchrequests == 28)
@@ -73,7 +73,7 @@ namespace DNF.Projects.Jobs
                             activity.Date = DateTime.Now;
 
                             var client = new RestClient("https://api.github.com/");
-                            client.Authenticator = new HttpBasicAuthenticator(settings["GithubUsername"], settings["GithubPassword"]);
+                            client.DefaultParameters.Add(new Parameter("Authorization", string.Format("Bearer " + settings["GithubToken"]), ParameterType.HttpHeader));
 
                             RestRequest request = null;
                             IRestResponse response = null;
@@ -170,7 +170,7 @@ namespace DNF.Projects.Jobs
                         }
                         else
                         {
-                            log += " - Failed: Github Username/Password Not Specified";
+                            log += " - Failed: Github Token Not Specified In Module Settings";
                         }
                         log += "<br />";
                     }

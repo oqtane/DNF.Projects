@@ -39,6 +39,7 @@
                 <td>Find: </td>
                 <td><input id="find" class="form-control" @bind="@_find" /></td>
                 <td><button type="button" class="btn btn-primary" @onclick="Display">Search</button></td>
+                <td><button type="button" class="btn btn-secondary" @onclick="Clear">Clear</button></td>
             </tr>
         </table>
         <br />
@@ -76,6 +77,7 @@
                 <td>@(context.PullRequests)</td>
             </Row>
         </Pager>
+        @_message
     }
     </div>
 
@@ -86,6 +88,7 @@
     string _to = DateTime.Now.ToString("MMM-dd-yyyy");
     string _metric = "PullRequests";
     string _find = "";
+    string _message = "";
     bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -118,7 +121,7 @@
             {
                 _Projects = _Projects.Where(item => item.Url.Contains(_find)).ToList();
             }
-            if (_Projects != null)
+            if (_Projects != null && _Projects.Count != 0)
             {
                 List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
                 if (ProjectActivity != null)
@@ -171,7 +174,12 @@
                             break;
                     }
                 }
+                _message = "";
                 _refresh = true;
+            }
+            else
+            {
+                _message = "There Are No Matches For The Criteria Specified";
             }
         }
         catch (Exception ex)
@@ -179,6 +187,12 @@
             await logger.LogError(ex, "Error Loading Project Activity {Error}", ex.Message);
             AddModuleMessage("Error Loading Project Activity", MessageType.Error);
         }
+    }
+
+    private async Task Clear()
+    {
+        _find = "";
+        await Display();
     }
 
     private async Task Delete(Project Project)

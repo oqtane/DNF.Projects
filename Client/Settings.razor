@@ -5,18 +5,10 @@
 <table class="table table-borderless">
     <tr>
         <td>
-            <label for="Username" class="control-label">Github Username: </label>
+            <Label For="_token" HelpText="Enter personal access token from Github">Github Token: </Label>
         </td>
         <td>
-            <input type="text" class="form-control" @bind="_username" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label for="Username" class="control-label">Github Password: </label>
-        </td>
-        <td>
-            <input type="password" class="form-control" @bind="_password" />
+            <input id="_token" type="text" class="form-control" @bind="@_token" />
         </td>
     </tr>
 </table>
@@ -24,16 +16,14 @@
 @code {
     public override string Title => "Project Settings";
 
-    string _username;
-    string _password;
+    string _token;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
-            _username = SettingService.GetSetting(settings, "GithubUsername", "");
-            _password = SettingService.GetSetting(settings, "GithubPassword", "");
+            _token = SettingService.GetSetting(settings, "GithubToken", "");
         }
         catch (Exception ex)
         {
@@ -46,8 +36,7 @@
         try
         {
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
-            SettingService.SetSetting(settings, "GithubUsername", _username);
-            SettingService.SetSetting(settings, "GithubPassword", _password);
+            SettingService.SetSetting(settings, "GithubToken", _token);
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)
