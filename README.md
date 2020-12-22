@@ -10,6 +10,14 @@ You can interact with a live demonstration of the module here:
 
 [.NET Foundation Project Activity](https://dnfprojects.azurewebsites.net/)
 
+Note that you cannot run this module directly in your IDE. You need to ensure that the DNF.Projects folder is located in the same parent folder as the Oqtane framework:  
+
+/username
+  /DNF.Projects
+  /oqtane.framework
+
+Organizing the folders in this way allows the system to automatically deploy the module DLLs to the Oqtane framework. Then you can run the Oqtane framework and it will dynamically load the module.
+
 Example Screen Shots:
 
 ![Module](https://github.com/oqtane/dnf.projects/blob/master/Screenshot1.png?raw=true "Bar Chart")
