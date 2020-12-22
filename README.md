@@ -18,7 +18,7 @@ Note that you cannot run this module directly in your IDE. You need to ensure th
   /oqtane.framework
 ```
 
-Organizing the folders in this way allows the system to automatically deploy the module DLLs to the Oqtane framework. Then you can run the Oqtane framework and it will dynamically load the module.
+Organizing the folders in this way allows the system to automatically deploy the module DLLs to the Oqtane framework when your build the module solution. Then you can run the Oqtane framework and it will dynamically load the module.
 
 Example Screen Shots:
 
