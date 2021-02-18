@@ -7,79 +7,79 @@
 @inject IProjectService ProjectService
 @inject NavigationManager NavigationManager
 
-    <div class="DNF-Projects-Index">
-        @if (_initialized && _Projects.Count > 0)
-    {
-        <table class="table table-borderless header">
-            <tr>
-                <td>From: </td>
-                <td><input id="from" class="form-control" @bind="@_from" /></td>
-                <td>To: </td>
-                <td><input id="to" class="form-control" @bind="@_to" /></td>
-                <td>Metric: </td>
-                <td>
-                    <select id="metric" class="form-control" @bind="@_metric">
-                        <option value="Watchers">Watchers</option>
-                        <option value="Stars">Stars</option>
-                        <option value="Forks">Forks</option>
-                        <option value="Contributors">Contributors</option>
-                        <option value="Commits">Commits</option>
-                        <option value="Issues">Issues</option>
-                        <option value="PullRequests">Pull Requests</option>
-                    </select>
-                </td>
-                <td><button type="button" class="btn btn-primary" @onclick="Display">Display</button></td>
-            </tr>
-        </table>
-        <br />
-        <div id="chart" class="chart"></div>
-        <br />
-        <table class="table table-borderless search">
-            <tr>
-                <td>Find: </td>
-                <td><input id="find" class="form-control" @bind="@_find" /></td>
-                <td><button type="button" class="btn btn-primary" @onclick="Display">Search</button></td>
-                <td><button type="button" class="btn btn-secondary" @onclick="Clear">Clear</button></td>
-            </tr>
-        </table>
-        <br />
-    }
+<div class="DNF-Projects-Index">
+@if (_initialized && _Projects.Count > 0)
+{
+    <table class="table table-borderless header">
+        <tr>
+            <td>From: </td>
+            <td><input id="from" class="form-control" @bind="@_from" /></td>
+            <td>To: </td>
+            <td><input id="to" class="form-control" @bind="@_to" /></td>
+            <td>Metric: </td>
+            <td>
+                <select id="metric" class="form-control" @bind="@_metric">
+                    <option value="Watchers">Watchers</option>
+                    <option value="Stars">Stars</option>
+                    <option value="Forks">Forks</option>
+                    <option value="Contributors">Contributors</option>
+                    <option value="Commits">Commits</option>
+                    <option value="Issues">Issues</option>
+                    <option value="PullRequests">Pull Requests</option>
+                </select>
+            </td>
+            <td><button type="button" class="btn btn-primary" @onclick="Display">Display</button></td>
+        </tr>
+    </table>
+    <br />
+    <div id="chart" class="chart"></div>
+    <br />
+    <table class="table table-borderless search">
+        <tr>
+            <td>Find: </td>
+            <td><input id="find" class="form-control" @bind="@_find" /></td>
+            <td><button type="button" class="btn btn-primary" @onclick="Display">Search</button></td>
+            <td><button type="button" class="btn btn-secondary" @onclick="Clear">Clear</button></td>
+        </tr>
+    </table>
+    <br />
+}
 
-        <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
+<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
 
-        @if (_initialized && _Projects.Count > 0)
-    {
-        <Pager Items="@_Projects">
-            <Header>
-                <th style="width: 1px;">&nbsp;</th>
-                <th style="width: 1px;">&nbsp;</th>
-                <th style="width: 1px;">&nbsp;</th>
-                <th>Name</th>
-                <th>Watchers</th>
-                <th>Stars</th>
-                <th>Forks</th>
-                <th>Contributors</th>
-                <th>Commits</th>
-                <th>Issues</th>
-                <th>PRs</th>
-            </Header>
-            <Row>
-                <td><ActionLink Action="View" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from + "&to=" + _to)" /></td>
-                <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
-                <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
-                <td>@((MarkupString)("<a href=\"" + context.Url + "\" target=\"_new\">" + context.Url.Replace(Common.UrlPrefix, "") + "</a>"))</td>
-                <td>@(context.Watchers)</td>
-                <td>@(context.Stars)</td>
-                <td>@(context.Forks)</td>
-                <td>@(context.Contributors)</td>
-                <td>@(context.Commits)</td>
-                <td>@(context.Issues)</td>
-                <td>@(context.PullRequests)</td>
-            </Row>
-        </Pager>
-        @_message
-    }
-    </div>
+@if (_initialized && _Projects.Count > 0)
+{
+    <Pager Items="@_Projects">
+        <Header>
+            <th style="width: 1px;">&nbsp;</th>
+            <th style="width: 1px;">&nbsp;</th>
+            <th style="width: 1px;">&nbsp;</th>
+            <th>Name</th>
+            <th>Watchers</th>
+            <th>Stars</th>
+            <th>Forks</th>
+            <th>Contributors</th>
+            <th>Commits</th>
+            <th>Issues</th>
+            <th>PRs</th>
+        </Header>
+        <Row>
+            <td><ActionLink Action="View" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from + "&to=" + _to)" /></td>
+            <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
+            <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
+            <td>@((MarkupString)("<a href=\"" + context.Url + "\" target=\"_new\">" + context.Url.Replace(Common.UrlPrefix, "") + "</a>"))</td>
+            <td>@(context.Watchers)</td>
+            <td>@(context.Stars)</td>
+            <td>@(context.Forks)</td>
+            <td>@(context.Contributors)</td>
+            <td>@(context.Commits)</td>
+            <td>@(context.Issues)</td>
+            <td>@(context.PullRequests)</td>
+        </Row>
+    </Pager>
+    @_message
+}
+</div>
 
 @code {
     bool _initialized = false;

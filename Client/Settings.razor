@@ -18,12 +18,11 @@
 
     string _token;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         try
         {
-            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
-            _token = SettingService.GetSetting(settings, "GithubToken", "");
+            _token = SettingService.GetSetting(ModuleState.Settings, "GithubToken", "");
         }
         catch (Exception ex)
         {
@@ -35,9 +34,8 @@
     {
         try
         {
-            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
-            SettingService.SetSetting(settings, "GithubToken", _token);
-            await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
+            SettingService.SetSetting(ModuleState.Settings, "GithubToken", _token);
+            await SettingService.UpdateModuleSettingsAsync(ModuleState.Settings, ModuleState.ModuleId);
         }
         catch (Exception ex)
         {

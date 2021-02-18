@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>DNF.Projects</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>DNF</authors>
     <owners>DNF</owners>
     <title>Projects</title>
@@ -20,13 +20,13 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Client\bin\Release\netstandard2.1\DNF.Projects.Client.Oqtane.dll" target="lib\netstandard2.1" /> 
-    <file src="..\Client\bin\Release\netstandard2.1\DNF.Projects.Client.Oqtane.pdb" target="lib\netstandard2.1" /> 
-    <file src="..\Server\bin\Release\netcoreapp3.1\DNF.Projects.Server.Oqtane.dll" target="lib\netcoreapp3.1" /> 
-    <file src="..\Server\bin\Release\netcoreapp3.1\DNF.Projects.Server.Oqtane.pdb" target="lib\netcoreapp3.1" />
-    <file src="..\Server\bin\Release\netcoreapp3.1\RestSharp.dll" target="lib\netcoreapp3.1" />
-    <file src="..\Shared\bin\Release\netstandard2.1\DNF.Projects.Shared.Oqtane.dll" target="lib\netstandard2.1" /> 
-    <file src="..\Shared\bin\Release\netstandard2.1\DNF.Projects.Shared.Oqtane.pdb" target="lib\netstandard2.1" /> 
+    <file src="..\Client\bin\Release\net5.0\DNF.Projects.Client.Oqtane.dll" target="lib\net5.0" /> 
+    <file src="..\Client\bin\Release\net5.0\DNF.Projects.Client.Oqtane.pdb" target="lib\net5.0" /> 
+    <file src="..\Server\bin\Release\net5.0\DNF.Projects.Server.Oqtane.dll" target="lib\net5.0" /> 
+    <file src="..\Server\bin\Release\net5.0\DNF.Projects.Server.Oqtane.pdb" target="lib\net5.0" />
+    <file src="..\Server\bin\Release\net5.0\RestSharp.dll" target="lib\net5.0" />
+    <file src="..\Shared\bin\Release\net5.0\DNF.Projects.Shared.Oqtane.dll" target="lib\net5.0" /> 
+    <file src="..\Shared\bin\Release\net5.0\DNF.Projects.Shared.Oqtane.pdb" target="lib\net5.0" /> 
     <file src="..\Server\wwwroot\**\*.*" target="wwwroot" /> 
   </files>
 </package>
