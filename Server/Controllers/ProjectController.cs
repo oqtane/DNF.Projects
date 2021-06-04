@@ -7,25 +7,18 @@ using Oqtane.Infrastructure;
 using DNF.Projects.Models;
 using DNF.Projects.Repository;
 using Microsoft.AspNetCore.Http;
+using Oqtane.Controllers;
 
 namespace DNF.Projects.Controllers
 {
-    [Route("{alias}/api/[controller]")]
-    public class ProjectController : Controller
+    [Route(ControllerRoutes.ApiRoute)]
+    public class ProjectController : ModuleControllerBase
     {
         private readonly IProjectRepository _Projects;
-        private readonly ILogManager _logger;
-        protected int _entityId = -1; // passed as a querystring parameter for policy authorization and used for validation
 
-        public ProjectController(IProjectRepository Projects, ILogManager logger, IHttpContextAccessor accessor)
+        public ProjectController(IProjectRepository Projects, ILogManager logger, IHttpContextAccessor accessor) : base(logger, accessor)
         {
             _Projects = Projects;
-            _logger = logger;
-
-            if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
-            {
-                _entityId = int.Parse(accessor.HttpContext.Request.Query["entityid"]);
-            }
         }
 
         // GET: api/<controller>?moduleid=x
@@ -33,7 +26,14 @@ namespace DNF.Projects.Controllers
         [Authorize(Policy = "ViewModule")]
         public IEnumerable<Project> Get(string moduleid)
         {
-            return _Projects.GetProjects(int.Parse(moduleid), -1);
+            if (int.Parse(moduleid) == _authEntityId[EntityNames.Module])
+            {
+                return _Projects.GetProjects(int.Parse(moduleid), -1);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         // GET api/<controller>/5
@@ -42,7 +42,7 @@ namespace DNF.Projects.Controllers
         public Project Get(int id)
         {
             Project Project = _Projects.GetProject(id);
-            if (Project != null && Project.ModuleId != _entityId)
+            if (Project != null && Project.ModuleId != _authEntityId[EntityNames.Module])
             {
                 Project = null;
             }
@@ -54,7 +54,7 @@ namespace DNF.Projects.Controllers
         [Authorize(Policy = "EditModule")]
         public Project Post([FromBody] Project Project)
         {
-            if (ModelState.IsValid && Project.ModuleId == _entityId)
+            if (ModelState.IsValid && Project.ModuleId == _authEntityId[EntityNames.Module])
             {
                 Project = _Projects.AddProject(Project);
                 _logger.Log(LogLevel.Information, this, LogFunction.Create, "Project Added {Project}", Project);
@@ -67,7 +67,7 @@ namespace DNF.Projects.Controllers
         [Authorize(Policy = "EditModule")]
         public Project Put(int id, [FromBody] Project Project)
         {
-            if (ModelState.IsValid && Project.ModuleId == _entityId)
+            if (ModelState.IsValid && Project.ModuleId == _authEntityId[EntityNames.Module])
             {
                 Project = _Projects.UpdateProject(Project);
                 _logger.Log(LogLevel.Information, this, LogFunction.Update, "Project Updated {Project}", Project);
@@ -81,7 +81,7 @@ namespace DNF.Projects.Controllers
         public void Delete(int id)
         {
             Project Project = _Projects.GetProject(id);
-            if (Project != null && _entityId == Project.ModuleId)
+            if (Project != null && Project.ModuleId ==_authEntityId[EntityNames.Module])
             {
                 _Projects.DeleteProject(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Project Deleted {ProjectId}", id);

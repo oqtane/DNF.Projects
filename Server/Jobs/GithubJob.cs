@@ -27,153 +27,139 @@ namespace DNF.Projects.Jobs
             string log = "";
             int searchrequests = 0;
 
-            // iterate through tenants in this installation
-            List<int> tenants = new List<int>();
-            var aliasRepository = provider.GetRequiredService<IAliasRepository>();
-            List<Alias> aliases = aliasRepository.GetAliases().ToList();
-            foreach (Alias alias in aliases)
+            // get services which require tenant resolution
+            var siteRepository = provider.GetRequiredService<ISiteRepository>();
+            var settingRepository = provider.GetRequiredService<ISettingRepository>();
+            var projectRepository = provider.GetRequiredService<IProjectRepository>();
+
+            // iterate through sites for this tenant
+            List<Site> sites = siteRepository.GetSites().ToList();
+            foreach (Site site in sites)
             {
-                if (tenants.Contains(alias.TenantId)) continue;
-                tenants.Add(alias.TenantId);
-
-                // use the SiteState to set the Alias explicitly so the tenant can be resolved
-                var siteState = provider.GetRequiredService<SiteState>();
-                siteState.Alias = alias;
-
-                // get services which require tenant resolution
-                var siteRepository = provider.GetRequiredService<ISiteRepository>();
-                var settingRepository = provider.GetRequiredService<ISettingRepository>();
-                var projectRepository = provider.GetRequiredService<IProjectRepository>();
-
-                // iterate through sites for this tenant
-                List<Site> sites = siteRepository.GetSites().ToList();
-                foreach (Site site in sites)
+                List<Project> projects = projectRepository.GetProjects(-1, site.SiteId).ToList();
+                foreach (Project project in projects)
                 {
-                    List<Project> projects = projectRepository.GetProjects(-1, site.SiteId).ToList();
-                    foreach (Project project in projects)
+                    log += "Processing Project: " + project.Url;
+
+                    // get module settings
+                    List<Setting> modulesettings = settingRepository.GetSettings(EntityNames.Module, project.ModuleId).ToList();
+                    Dictionary<string, string> settings = GetSettings(modulesettings);
+                    if (settings.ContainsKey("GithubToken"))
                     {
-                        log += "Processing Project: " + project.Url;
-
-                        // get module settings
-                        List<Setting> modulesettings = settingRepository.GetSettings(EntityNames.Module, project.ModuleId).ToList();
-                        Dictionary<string, string> settings = GetSettings(modulesettings);
-                        if (settings.ContainsKey("GithubToken"))
+                        // search rate limit ( 30 requests per minute )
+                        if (searchrequests == 28)
                         {
-                            // search rate limit ( 30 requests per minute )
-                            if (searchrequests == 28)
+                            Thread.Sleep(60 * 1000); // 60 seconds
+                            searchrequests = 0;
+                        }
+
+                        string resource = project.Url.Replace(Common.UrlPrefix, "");
+
+                        var activity = new ProjectActivity();
+                        activity.ProjectId = project.ProjectId;
+                        activity.Date = DateTime.Now;
+
+                        var client = new RestClient("https://api.github.com/");
+                        client.DefaultParameters.Add(new Parameter("Authorization", string.Format("Bearer " + settings["GithubToken"]), ParameterType.HttpHeader));
+
+                        RestRequest request = null;
+                        IRestResponse response = null;
+                        JObject jObject;
+                        JArray jArray;
+
+                        // get stars, forks, watchers
+                        try
+                        {
+                            request = new RestRequest("repos/" + resource);
+                            response = client.Execute(request);
+                            jObject = JObject.Parse(response.Content);
+                            activity.Stars = int.Parse(jObject.GetValue("stargazers_count").ToString());
+                            activity.Forks = int.Parse(jObject.GetValue("forks_count").ToString());
+                            activity.Watchers = int.Parse(jObject.GetValue("subscribers_count").ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                        }
+
+                        // get contributors, commits
+                        try
+                        {
+                            int Page = 1;
+                            while (Page != -1)
                             {
-                                Thread.Sleep(60 * 1000); // 60 seconds
-                                searchrequests = 0;
-                            }
-
-                            string resource = project.Url.Replace(Common.UrlPrefix, "");
-
-                            var activity = new ProjectActivity();
-                            activity.ProjectId = project.ProjectId;
-                            activity.Date = DateTime.Now;
-
-                            var client = new RestClient("https://api.github.com/");
-                            client.DefaultParameters.Add(new Parameter("Authorization", string.Format("Bearer " + settings["GithubToken"]), ParameterType.HttpHeader));
-
-                            RestRequest request = null;
-                            IRestResponse response = null;
-                            JObject jObject;
-                            JArray jArray;
-
-                            // get stars, forks, watchers
-                            try
-                            {
-                                request = new RestRequest("repos/" + resource);
+                                request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
                                 response = client.Execute(request);
-                                jObject = JObject.Parse(response.Content);
-                                activity.Stars = int.Parse(jObject.GetValue("stargazers_count").ToString());
-                                activity.Forks = int.Parse(jObject.GetValue("forks_count").ToString());
-                                activity.Watchers = int.Parse(jObject.GetValue("subscribers_count").ToString());
-                            }
-                            catch (Exception ex)
-                            {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
-                            }
-
-                            // get contributors, commits
-                            try
-                            {
-                                int Page = 1;
-                                while (Page != -1)
+                                jArray = JArray.Parse(response.Content);
+                                if (jArray.Count > 0)
                                 {
-                                    request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
-                                    response = client.Execute(request);
-                                    jArray = JArray.Parse(response.Content);
-                                    if (jArray.Count > 0)
+                                    foreach (JObject contributor in jArray)
                                     {
-                                        foreach (JObject contributor in jArray)
-                                        {
-                                            activity.Contributors += 1;
-                                            activity.Commits += int.Parse(contributor.GetValue("contributions").ToString());
-                                        }
-                                        Page += 1;
+                                        activity.Contributors += 1;
+                                        activity.Commits += int.Parse(contributor.GetValue("contributions").ToString());
                                     }
-                                    else
-                                    {
-                                        Page = -1;
-                                    }
+                                    Page += 1;
+                                }
+                                else
+                                {
+                                    Page = -1;
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
-                            }
-
-                            // get issues
-                            try
-                            {
-                                request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:open");
-                                response = client.Execute(request);
-                                jObject = JObject.Parse(response.Content);
-                                activity.Issues = int.Parse(jObject.GetValue("total_count").ToString());
-
-                                request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
-                                response = client.Execute(request);
-                                jObject = JObject.Parse(response.Content);
-                                activity.Issues += int.Parse(jObject.GetValue("total_count").ToString());
-
-                                searchrequests += 2;
-                            }
-                            catch (Exception ex)
-                            {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
-                            }
-
-                            // get pull requests
-                            try
-                            {
-                                request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:open");
-                                response = client.Execute(request);
-                                jObject = JObject.Parse(response.Content);
-                                activity.PullRequests = int.Parse(jObject.GetValue("total_count").ToString());
-
-                                request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:closed");
-                                response = client.Execute(request);
-                                jObject = JObject.Parse(response.Content);
-                                activity.PullRequests += int.Parse(jObject.GetValue("total_count").ToString());
-
-                                searchrequests += 2;
-                            }
-                            catch (Exception ex)
-                            {
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
-                            }
-
-                            projectRepository.AddProjectActivity(activity);
-
-                            log += " - Succeeded";
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            log += " - Failed: Github Token Not Specified In Module Settings";
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
-                        log += "<br />";
+
+                        // get issues
+                        try
+                        {
+                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:open");
+                            response = client.Execute(request);
+                            jObject = JObject.Parse(response.Content);
+                            activity.Issues = int.Parse(jObject.GetValue("total_count").ToString());
+
+                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
+                            response = client.Execute(request);
+                            jObject = JObject.Parse(response.Content);
+                            activity.Issues += int.Parse(jObject.GetValue("total_count").ToString());
+
+                            searchrequests += 2;
+                        }
+                        catch (Exception ex)
+                        {
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                        }
+
+                        // get pull requests
+                        try
+                        {
+                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:open");
+                            response = client.Execute(request);
+                            jObject = JObject.Parse(response.Content);
+                            activity.PullRequests = int.Parse(jObject.GetValue("total_count").ToString());
+
+                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:closed");
+                            response = client.Execute(request);
+                            jObject = JObject.Parse(response.Content);
+                            activity.PullRequests += int.Parse(jObject.GetValue("total_count").ToString());
+
+                            searchrequests += 2;
+                        }
+                        catch (Exception ex)
+                        {
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                        }
+
+                        projectRepository.AddProjectActivity(activity);
+
+                        log += " - Succeeded";
                     }
+                    else
+                    {
+                        log += " - Failed: Github Token Not Specified In Module Settings";
+                    }
+                    log += "<br />";
                 }
             }
 

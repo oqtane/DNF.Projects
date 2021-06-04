@@ -9,9 +9,10 @@ namespace DNF.Projects
         {
             Name = "Project",
             Description = "Project",
-            Version = "1.0.1",
+            Version = "1.0.2",
             ServerManagerType = "DNF.Projects.Manager.ProjectManager, DNF.Projects.Server.Oqtane",
-            ReleaseVersions = "1.0.0,1.0.1",
+            ReleaseVersions = "1.0.0,1.0.1,1.0.2",
+            SettingsType = "DNF.Projects.Settings, DNF.Projects.Client.Oqtane",
             Dependencies = "DNF.Projects.Shared.Oqtane"
         };
     }

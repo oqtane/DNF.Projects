@@ -1,6 +1,7 @@
 @namespace DNF.Projects
 @inherits ModuleBase
 @inject ISettingService SettingService
+@implements Oqtane.Interfaces.ISettingsControl
 
 <table class="table table-borderless">
     <tr>
@@ -34,8 +35,9 @@
     {
         try
         {
-            SettingService.SetSetting(ModuleState.Settings, "GithubToken", _token);
-            await SettingService.UpdateModuleSettingsAsync(ModuleState.Settings, ModuleState.ModuleId);
+            var settings = ModuleState.Settings;
+            settings = SettingService.SetSetting(settings, "GithubToken", _token);
+            await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)
         {

@@ -21,51 +21,38 @@ namespace DNF.Projects.Services
 
         public async Task<List<Project>> GetProjectsAsync(int ModuleId)
         {
-            List<Project> Projects = await GetJsonAsync<List<Project>>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "Project") + $"?moduleid={ModuleId}", ModuleId));
+            List<Project> Projects = await GetJsonAsync<List<Project>>(CreateAuthorizationPolicyUrl(CreateApiUrl("Project", _siteState.Alias) + $"?moduleid={ModuleId}", EntityNames.Module, ModuleId));
             return Projects.OrderBy(item => item.Url).ToList();
         }
 
         public async Task<Project> GetProjectAsync(int ProjectId, int ModuleId)
         {
-            return await GetJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "Project") + $"/{ProjectId}", ModuleId));
+            return await GetJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl("Project", _siteState.Alias) + $"/{ProjectId}", EntityNames.Module, ModuleId));
         }
 
         public async Task<Project> AddProjectAsync(Project Project)
         {
-            return await PostJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "Project"), Project.ModuleId), Project);
+            return await PostJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl("Project", _siteState.Alias), EntityNames.Module, Project.ModuleId), Project);
         }
 
         public async Task<Project> UpdateProjectAsync(Project Project)
         {
-            return await PutJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "Project") + $"/{Project.ProjectId}", Project.ModuleId), Project);
+            return await PutJsonAsync<Project>(CreateAuthorizationPolicyUrl(CreateApiUrl("Project", _siteState.Alias) + $"/{Project.ProjectId}", EntityNames.Module, Project.ModuleId), Project);
         }
 
         public async Task DeleteProjectAsync(int ProjectId, int ModuleId)
         {
-            await DeleteAsync(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "Project") + $"/{ProjectId}", ModuleId));
+            await DeleteAsync(CreateAuthorizationPolicyUrl(CreateApiUrl("Project", _siteState.Alias) + $"/{ProjectId}", EntityNames.Module, ModuleId));
         }
 
         public async Task<List<ProjectActivity>> GetProjectActivityAsync(int ProjectId, DateTime FromDate, DateTime ToDate, int ModuleId)
         {
-            return await GetJsonAsync<List<ProjectActivity>>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "ProjectActivity") + $"?projectid={ProjectId}&fromdate={FromDate:yyyy-MMM-dd}&todate={ToDate:yyyy-MMM-dd}", ModuleId));
+            return await GetJsonAsync<List<ProjectActivity>>(CreateAuthorizationPolicyUrl(CreateApiUrl("ProjectActivity", _siteState.Alias) + $"?projectid={ProjectId}&fromdate={FromDate:yyyy-MMM-dd}&todate={ToDate:yyyy-MMM-dd}", EntityNames.Module, ModuleId));
         }
 
         public async Task<ProjectActivity> AddProjectActivityAsync(ProjectActivity ProjectActivity, int ModuleId)
         {
-            return await PostJsonAsync<ProjectActivity>(CreateAuthorizationPolicyUrl(CreateApiUrl(_siteState.Alias, "ProjectActivity"), ModuleId), ProjectActivity);
-        }
-
-        // add entityid parameter to url for custom authorization policy
-        private string CreateAuthorizationPolicyUrl(string url, int entityId)
-        {
-            if (url.Contains("?"))
-            {
-                return url + "&entityid=" + entityId.ToString();
-            }
-            else
-            {
-                return url + "?entityid=" + entityId.ToString();
-            }
+            return await PostJsonAsync<ProjectActivity>(CreateAuthorizationPolicyUrl(CreateApiUrl("ProjectActivity", _siteState.Alias), EntityNames.Module, ModuleId), ProjectActivity);
         }
 
     }

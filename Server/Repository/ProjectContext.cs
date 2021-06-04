@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Oqtane.Modules;
 using Oqtane.Repository;
 using DNF.Projects.Models;
+using Oqtane.Infrastructure;
 
 namespace DNF.Projects.Repository
 {
@@ -11,7 +12,7 @@ namespace DNF.Projects.Repository
         public virtual DbSet<Project> Project { get; set; }
         public virtual DbSet<ProjectActivity> ProjectActivity { get; set; }
 
-        public ProjectContext(ITenantResolver tenantResolver, IHttpContextAccessor accessor) : base(tenantResolver, accessor)
+        public ProjectContext(ITenantManager tenantManager, IHttpContextAccessor accessor) : base(tenantManager, accessor)
         {
             // ContextBase handles multi-tenant database connections
         }

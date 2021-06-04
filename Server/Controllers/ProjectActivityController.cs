@@ -8,25 +8,18 @@ using DNF.Projects.Models;
 using DNF.Projects.Repository;
 using System;
 using Microsoft.AspNetCore.Http;
+using Oqtane.Controllers;
 
 namespace DNF.Projects.Controllers
 {
-    [Route("{alias}/api/[controller]")]
-    public class ProjectActivityController : Controller
+    [Route(ControllerRoutes.ApiRoute)]
+    public class ProjectActivityController : ModuleControllerBase
     {
         private readonly IProjectRepository _Projects;
-        private readonly ILogManager _logger;
-        protected int _entityId = -1; // passed as a querystring parameter for policy authorization and used for validation
 
-        public ProjectActivityController(IProjectRepository Projects, ILogManager logger, IHttpContextAccessor accessor)
+        public ProjectActivityController(IProjectRepository Projects, ILogManager logger, IHttpContextAccessor accessor) : base(logger, accessor)
         {
             _Projects = Projects;
-            _logger = logger;
-
-            if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
-            {
-                _entityId = int.Parse(accessor.HttpContext.Request.Query["entityid"]);
-            }
         }
 
         // GET: api/<controller>?projectid=x&fromdate=yyyy-MMM-dd&todate=yyyy-MMM-dd
@@ -37,7 +30,7 @@ namespace DNF.Projects.Controllers
             List<ProjectActivity> activities = new List<ProjectActivity>();
             foreach(var activity in _Projects.GetProjectActivity(int.Parse(projectid), DateTime.Parse(fromdate), DateTime.Parse(todate)))
             {
-                if (activity.Project.ModuleId == _entityId)
+                if (activity.Project.ModuleId == _authEntityId[EntityNames.Module])
                 {
                     activities.Add(activity);
                 }
@@ -53,7 +46,7 @@ namespace DNF.Projects.Controllers
             if (ModelState.IsValid)
             {
                 Project Project = _Projects.GetProject(ProjectActivity.ProjectId);
-                if (Project != null && Project.ModuleId == _entityId)
+                if (Project != null && Project.ModuleId == _authEntityId[EntityNames.Module])
                 {
                     ProjectActivity = _Projects.AddProjectActivity(ProjectActivity);
                     _logger.Log(LogLevel.Information, this, LogFunction.Create, "Project Activity Added {ProjectActivity}", ProjectActivity);

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>DNF.Projects</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <authors>DNF</authors>
     <owners>DNF</owners>
     <title>Projects</title>
@@ -11,12 +11,12 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/oqtane/oqtane.framework</projectUrl>
-    <iconUrl>https://www.oqtane.org/Portals/0/icon.jpg</iconUrl>
+    <icon>icon.png</icon>
     <tags>oqtane module</tags>
     <releaseNotes></releaseNotes>
     <summary></summary>
     <dependencies>
-      <dependency id="Oqtane.Framework" version="1.0.1" />
+      <dependency id="Oqtane.Framework" version="2.1.0" />
     </dependencies>
   </metadata>
   <files>
@@ -27,6 +27,7 @@
     <file src="..\Server\bin\Release\net5.0\RestSharp.dll" target="lib\net5.0" />
     <file src="..\Shared\bin\Release\net5.0\DNF.Projects.Shared.Oqtane.dll" target="lib\net5.0" /> 
     <file src="..\Shared\bin\Release\net5.0\DNF.Projects.Shared.Oqtane.pdb" target="lib\net5.0" /> 
-    <file src="..\Server\wwwroot\**\*.*" target="wwwroot" /> 
+    <file src="..\Server\wwwroot\**\*.*" target="wwwroot" />
+    <file src="icon.png" target="" />
   </files>
 </package>

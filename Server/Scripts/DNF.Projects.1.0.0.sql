@@ -49,9 +49,3 @@ REFERENCES [dbo].[Project] ([ProjectId])
 ON DELETE CASCADE
 GO
 
-/*
-	create job
-*/
-INSERT INTO [dbo].[Job] ([Name],[JobType],[Frequency],[Interval],[StartDate],[EndDate],[IsEnabled],[IsStarted],[IsExecuting],[NextExecution],[RetentionHistory],[CreatedBy],[CreatedOn],[ModifiedBy],[ModifiedOn])
-VALUES ('Github Activity', 'DNF.Projects.Jobs.GithubJob, DNF.Projects.Server.Oqtane', 'd', 1, null, null, 0, 0, 0, null, 10, '', getdate(), '', getdate())
-GO
