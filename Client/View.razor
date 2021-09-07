@@ -8,45 +8,46 @@
 @inject NavigationManager NavigationManager
 
 <div class="DNF-Projects-View">
-@if (_initialized)
-{
-    <h2 class="text-center">@_name</h2>
-    <table class="table table-borderless header">
-        <tr>
-            <td>From: </td>
-            <td><input id="from" class="form-control" @bind="@_from" /></td>
-            <td>To: </td>
-            <td><input id="to" class="form-control" @bind="@_to" /></td>
-            <td><button type="button" class="btn btn-primary" @onclick="Display">Display</button></td>
-        </tr>
-    </table>
-    <br />
-    <div id="chart" class="chart"></div>
-    <br />
-    <br />
-    <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)">
-        <Header>
-            <th>Date</th>
-            <th>Watchers</th>
-            <th>Stars</th>
-            <th>Forks</th>
-            <th>Contributors</th>
-            <th>Commits</th>
-            <th>Issues</th>
-            <th>PRs</th>
-        </Header>
-        <Row>
-            <td>@(context.Date.ToString("MMM-dd-yyyy"))</td>
-            <td>@(context.Watchers)</td>
-            <td>@(context.Stars)</td>
-            <td>@(context.Forks)</td>
-            <td>@(context.Contributors)</td>
-            <td>@(context.Commits)</td>
-            <td>@(context.Issues)</td>
-            <td>@(context.PullRequests)</td>
-        </Row>
-    </Pager>
-}
+    @if (_initialized)
+    {
+        <h2 class="text-center">@_name</h2>
+        <div class="row justify-content-center mb-3">
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <input type="date" class="form-control" @bind="@_from" />
+                    <span class="input-group-text">To</span>
+                    <input type="date" class="form-control" @bind="@_to" />
+                    <button type="button" class="btn btn-primary" @onclick="Display">Display</button>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div id="chart" class="chart"></div>
+        <br />
+        <br />
+        <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)">
+            <Header>
+                <th>Date</th>
+                <th>Watchers</th>
+                <th>Stars</th>
+                <th>Forks</th>
+                <th>Contributors</th>
+                <th>Commits</th>
+                <th>Issues</th>
+                <th>PRs</th>
+            </Header>
+            <Row>
+                <td>@(context.Date.ToString("MMM-dd-yyyy"))</td>
+                <td>@(context.Watchers)</td>
+                <td>@(context.Stars)</td>
+                <td>@(context.Forks)</td>
+                <td>@(context.Contributors)</td>
+                <td>@(context.Commits)</td>
+                <td>@(context.Issues)</td>
+                <td>@(context.PullRequests)</td>
+            </Row>
+        </Pager>
+    }
 </div>
 
 @code {
@@ -54,8 +55,8 @@
     List<ProjectActivity> _ProjectActivity;
     int _id;
     string _name;
-    string _from = DateTime.Now.AddDays(-30).ToString("MMM-dd-yyyy");
-    string _to = DateTime.Now.ToString("MMM-dd-yyyy");
+    DateTime _from = DateTime.Now.AddDays(-30);
+    DateTime _to = DateTime.Now;
     bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -73,11 +74,11 @@
         {
             if (PageState.QueryString.ContainsKey("from"))
             {
-                _from = PageState.QueryString["from"];
+                _from = DateTime.Parse(PageState.QueryString["from"]);
             }
             if (PageState.QueryString.ContainsKey("to"))
             {
-                _to = PageState.QueryString["to"];
+                _to = DateTime.Parse(PageState.QueryString["to"]);
             }
 
             _id = Int32.Parse(PageState.QueryString["id"]);
@@ -100,12 +101,13 @@
     {
         try
         {
-            _ProjectActivity = await ProjectService.GetProjectActivityAsync(_id, DateTime.Parse(_from), DateTime.Parse(_to), ModuleState.ModuleId);
+            _ProjectActivity = await ProjectService.GetProjectActivityAsync(_id, _from.Date, _to.Date, ModuleState.ModuleId);
             if (_ProjectActivity.Count > 0)
             {
                 _ProjectActivity = _ProjectActivity.OrderByDescending(item => item.Date).ToList();
                 _refresh = true;
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {
