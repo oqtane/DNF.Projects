@@ -12,7 +12,6 @@ using Oqtane.Models;
 using Oqtane.Repository;
 using Oqtane.Shared;
 using RestSharp;
-using RestSharp.Authenticators;
 
 namespace DNF.Projects.Jobs
 {
@@ -60,7 +59,6 @@ namespace DNF.Projects.Jobs
                         activity.Date = DateTime.Now;
 
                         var client = new RestClient("https://api.github.com/");
-                        client.DefaultParameters.Add(new Parameter("Authorization", string.Format("Bearer " + settings["GithubToken"]), ParameterType.HttpHeader));
 
                         RestRequest request = null;
                         IRestResponse response = null;
@@ -71,6 +69,7 @@ namespace DNF.Projects.Jobs
                         try
                         {
                             request = new RestRequest("repos/" + resource);
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JObject.Parse(response.Content);
                             activity.Stars = int.Parse(jObject.GetValue("stargazers_count").ToString());
@@ -89,6 +88,7 @@ namespace DNF.Projects.Jobs
                             while (Page != -1)
                             {
                                 request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
+                                request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                                 response = client.Execute(request);
                                 jArray = JArray.Parse(response.Content);
                                 if (jArray.Count > 0)
@@ -115,11 +115,13 @@ namespace DNF.Projects.Jobs
                         try
                         {
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:open");
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JObject.Parse(response.Content);
                             activity.Issues = int.Parse(jObject.GetValue("total_count").ToString());
 
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JObject.Parse(response.Content);
                             activity.Issues += int.Parse(jObject.GetValue("total_count").ToString());
@@ -135,11 +137,13 @@ namespace DNF.Projects.Jobs
                         try
                         {
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:open");
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JObject.Parse(response.Content);
                             activity.PullRequests = int.Parse(jObject.GetValue("total_count").ToString());
 
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:closed");
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JObject.Parse(response.Content);
                             activity.PullRequests += int.Parse(jObject.GetValue("total_count").ToString());
