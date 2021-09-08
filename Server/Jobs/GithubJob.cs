@@ -56,7 +56,20 @@ namespace DNF.Projects.Jobs
 
                         var activity = new ProjectActivity();
                         activity.ProjectId = project.ProjectId;
-                        activity.Date = DateTime.Now;
+                        activity.Date = DateTime.Now.Date;
+
+                        // get metrics from previous day to initialize
+                        var yesterday = projectRepository.GetProjectActivity(project.ProjectId, activity.Date.AddDays(-1).Date, activity.Date.Date).FirstOrDefault();
+                        if (yesterday != null)
+                        {
+                            activity.Stars = yesterday.Stars;
+                            activity.Forks = yesterday.Forks;
+                            activity.Watchers = yesterday.Watchers;
+                            activity.Contributors = yesterday.Contributors;
+                            activity.Commits = yesterday.Commits;
+                            activity.Issues = yesterday.Issues;
+                            activity.PullRequests = yesterday.PullRequests;
+                        }
 
                         var client = new RestClient("https://api.github.com/");
 
@@ -84,6 +97,8 @@ namespace DNF.Projects.Jobs
                         // get contributors, commits
                         try
                         {
+                            int contributors = 0;
+                            int commits = 0;
                             int Page = 1;
                             while (Page != -1)
                             {
@@ -95,8 +110,8 @@ namespace DNF.Projects.Jobs
                                 {
                                     foreach (JObject contributor in jArray)
                                     {
-                                        activity.Contributors += 1;
-                                        activity.Commits += int.Parse(contributor.GetValue("contributions").ToString());
+                                        contributors += 1;
+                                        commits += int.Parse(contributor.GetValue("contributions").ToString());
                                     }
                                     Page += 1;
                                 }
@@ -105,6 +120,8 @@ namespace DNF.Projects.Jobs
                                     Page = -1;
                                 }
                             }
+                            activity.Contributors = contributors;
+                            activity.Commits = commits;
                         }
                         catch (Exception ex)
                         {

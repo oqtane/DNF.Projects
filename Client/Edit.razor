@@ -154,7 +154,7 @@
                 {
                     var activity = new ProjectActivity();
                     activity.ProjectId = Project.ProjectId;
-                    activity.Date = date;
+                    activity.Date = date.Date;
                     activity.Watchers = (string.IsNullOrEmpty(_watchers) ? 0 : int.Parse(_watchers));
                     activity.Stars = (string.IsNullOrEmpty(_stars) ? 0 : int.Parse(_stars));
                     activity.Forks = (string.IsNullOrEmpty(_forks) ? 0 : int.Parse(_forks));

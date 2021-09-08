@@ -67,7 +67,7 @@ namespace DNF.Projects.Manager
                     {
                         ProjectActivity activity = new ProjectActivity();
                         activity.ProjectId = project.ProjectId;
-                        activity.Date = Project.Date.Value;
+                        activity.Date = Project.Date.Value.Date;
                         activity.Watchers = Project.Watchers;
                         activity.Stars = Project.Stars;
                         activity.Forks = Project.Forks;

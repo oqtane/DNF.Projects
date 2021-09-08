@@ -38,7 +38,7 @@
                 <div class="input-group">
                     <input id="find" class="form-control" @bind="@_find" />
                     <button type="button" class="btn btn-primary" @onclick="Display">Search</button>
-                    <button type="button" class="btn btn-secondary" @onclick="Clear">Clear</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Reset">Reset</button>
                 </div>
             </div>
         </div>
@@ -119,7 +119,14 @@
             _Projects = await ProjectService.GetProjectsAsync(ModuleState.ModuleId);
             if (!string.IsNullOrEmpty(_find))
             {
-                _Projects = _Projects.Where(item => item.Url.Contains(_find)).ToList();
+                if (_Projects.Where(item => item.Url.ToLower().Contains(_find.ToLower())).Any())
+                {
+                    _Projects = _Projects.Where(item => item.Url.ToLower().Contains(_find.ToLower())).ToList();
+                }
+                else
+                {
+                    _message = "There Are No Matches For The Criteria Specified";
+                }
             }
             if (_Projects != null && _Projects.Count != 0)
             {
@@ -177,10 +184,6 @@
                 _message = "";
                 _refresh = true;
             }
-            else
-            {
-                _message = "There Are No Matches For The Criteria Specified";
-            }
             StateHasChanged();
         }
         catch (Exception ex)
@@ -190,7 +193,7 @@
         }
     }
 
-    private async Task Clear()
+    private async Task Reset()
     {
         _find = "";
         await Display();

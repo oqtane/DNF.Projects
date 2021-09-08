@@ -28,7 +28,7 @@ namespace DNF.Projects.Controllers
         public IEnumerable<ProjectActivity> Get(string projectid, string fromdate, string todate)
         {
             List<ProjectActivity> activities = new List<ProjectActivity>();
-            foreach(var activity in _Projects.GetProjectActivity(int.Parse(projectid), DateTime.Parse(fromdate), DateTime.Parse(todate)))
+            foreach(var activity in _Projects.GetProjectActivity(int.Parse(projectid), DateTime.Parse(fromdate).Date, DateTime.Parse(todate).Date))
             {
                 if (activity.Project.ModuleId == _authEntityId[EntityNames.Module])
                 {
