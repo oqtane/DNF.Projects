@@ -12,18 +12,38 @@
             <input id="_token" type="text" class="form-control" @bind="@_token" />
         </td>
     </tr>
+    <tr>
+        <td>
+            <Label For="_name" HelpText="Enter name of the person to notify when there are issues accessing the Github API">Notify Name: </Label>
+        </td>
+        <td>
+            <input id="_name" type="text" class="form-control" @bind="@_name" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="_email" HelpText="Enter email address to notify when there are issues accessing the Github API">Notify Email: </Label>
+        </td>
+        <td>
+            <input id="_email" type="text" class="form-control" @bind="@_email" />
+        </td>
+    </tr>
 </table>
 
 @code {
     public override string Title => "Project Settings";
 
     string _token;
+    string _name;
+    string _email;
 
     protected override void OnInitialized()
     {
         try
         {
             _token = SettingService.GetSetting(ModuleState.Settings, "GithubToken", "");
+            _name = SettingService.GetSetting(ModuleState.Settings, "NotifyName", "");
+            _email = SettingService.GetSetting(ModuleState.Settings, "NotifyEmail", "");
         }
         catch (Exception ex)
         {
@@ -37,6 +57,8 @@
         {
             var settings = ModuleState.Settings;
             settings = SettingService.SetSetting(settings, "GithubToken", _token);
+            settings = SettingService.SetSetting(settings, "NotifyName", _name);
+            settings = SettingService.SetSetting(settings, "NotifyEmail", _email);
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)

@@ -19,7 +19,13 @@ namespace DNF.Projects.Jobs
     {
         // JobType = "DNF.Projects.Jobs.GithubJob, DNF.Projects.Server.Oqtane"
 
-        public GithubJob(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory) { }
+        public GithubJob(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory) 
+        {
+            Name = "Github Projects Job";
+            Frequency = "d"; // daily
+            Interval = 1;
+            IsEnabled = false;
+        }
 
         public override string ExecuteJob(IServiceProvider provider)
         {
@@ -30,6 +36,7 @@ namespace DNF.Projects.Jobs
             var siteRepository = provider.GetRequiredService<ISiteRepository>();
             var settingRepository = provider.GetRequiredService<ISettingRepository>();
             var projectRepository = provider.GetRequiredService<IProjectRepository>();
+            var notificationRepository = provider.GetRequiredService<INotificationRepository>();
 
             // iterate through sites for this tenant
             List<Site> sites = siteRepository.GetSites().ToList();
@@ -77,6 +84,7 @@ namespace DNF.Projects.Jobs
                         IRestResponse response = null;
                         JObject jObject;
                         JArray jArray;
+                        bool error = false;
 
                         // get stars, forks, watchers
                         try
@@ -91,6 +99,7 @@ namespace DNF.Projects.Jobs
                         }
                         catch (Exception ex)
                         {
+                            error = true;
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
@@ -125,6 +134,7 @@ namespace DNF.Projects.Jobs
                         }
                         catch (Exception ex)
                         {
+                            error = true;
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
@@ -147,6 +157,7 @@ namespace DNF.Projects.Jobs
                         }
                         catch (Exception ex)
                         {
+                            error = true;
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
@@ -169,10 +180,17 @@ namespace DNF.Projects.Jobs
                         }
                         catch (Exception ex)
                         {
+                            error = true;
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
                         projectRepository.AddProjectActivity(activity);
+
+                        if (error && settings.ContainsKey("NotifyName") && settings.ContainsKey("NotifyEmail"))
+                        {
+                            var notification = new Notification(site.SiteId, "", "", settings["NotifyName"], settings["NotifyEmail"], "GitHub Project API Error", "Url: " + project.Url);
+                            notificationRepository.AddNotification(notification);
+                        }
 
                         log += " - Succeeded";
                     }
