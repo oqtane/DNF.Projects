@@ -55,10 +55,10 @@
     {
         try
         {
-            var settings = ModuleState.Settings;
-            settings = SettingService.SetSetting(settings, "GithubToken", _token);
-            settings = SettingService.SetSetting(settings, "NotifyName", _name);
-            settings = SettingService.SetSetting(settings, "NotifyEmail", _email);
+			var settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            settings = SettingService.SetSetting(settings, "GithubToken", _token, true);
+            settings = SettingService.SetSetting(settings, "NotifyName", _name, true);
+            settings = SettingService.SetSetting(settings, "NotifyEmail", _email, true);
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)

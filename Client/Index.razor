@@ -26,13 +26,13 @@
                         <div class="mb-3">
                             <div class="input-group">
                                 <select id="metric" class="form-control" @bind="@_metric">
-                                    <option value="Watchers">Watchers</option>
-                                    <option value="Stars">Stars</option>
-                                    <option value="Forks">Forks</option>
-                                    <option value="Contributors">Contributors</option>
-                                    <option value="Commits">Commits</option>
-                                    <option value="Issues">Issues</option>
-                                    <option value="Pull Requests">Pull Requests</option>
+                                    <option value="watcher">Watchers</option>
+                                    <option value="star">Stars</option>
+                                    <option value="fork">Forks</option>
+                                    <option value="contributor">Contributors</option>
+                                    <option value="commit">Commits</option>
+                                    <option value="issue">Issues</option>
+                                    <option value="pr">Pull Requests</option>
                                 </select>
                                 <button type="button" class="btn btn-primary" @onclick="Display">Display</button>
                             </div>
@@ -70,10 +70,10 @@
                     <th style="width: 1px;">&nbsp;</th>
                 }
                 <th>Name</th>
-                <th style="text-align:right">@_metric</th>
+                <th style="text-align:right">@FormatMetric(_metric)</th>
             </Header>
             <Row>
-                <td><ActionLink Action="View" IconName="@Icons.MagnifyingGlass" IconOnly="true" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy"))" /></td>
+                <td><ActionLink Action="View" IconName="@Icons.MagnifyingGlass" IconOnly="true" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric)" /></td>
                 @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
                 {
                     <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
@@ -83,25 +83,25 @@
                 <td style="text-align:right">
                     @switch (_metric)
                     {
-                        case "Watchers":
+                        case "watcher":
                             @context.Watchers
                             break;
-                        case "Stars":
+                        case "star":
                             @context.Stars
                             break;
-                        case "Forks":
+                        case "fork":
                             @context.Forks
                             break;
-                        case "Contributors":
+                        case "contributor":
                             @context.Contributors
                             break;
-                        case "Commits":
+                        case "commit":
                             @context.Commits
                             break;
-                        case "Issues":
+                        case "issue":
                             @context.Issues
                             break;
-                        case "Pull Requests":
+                        case "pr":
                             @context.PullRequests
                             break;
                     }
@@ -118,7 +118,7 @@
     List<Project> _Projects;
     DateTime _from = DateTime.Now.AddDays(-30);
     DateTime _to = DateTime.Now;
-    string _metric = "Pull Requests";
+    string _metric = "pr";
     string _find = "";
     string _message = "";
     bool _refresh = false;
@@ -134,6 +134,19 @@
     {
         try
         {
+            if (PageState.QueryString.ContainsKey("from") && DateTime.TryParse(PageState.QueryString["from"], out DateTime from))
+            {
+                _from = from.Date;
+            }
+            if (PageState.QueryString.ContainsKey("to") && DateTime.TryParse(PageState.QueryString["to"], out DateTime to))
+            {
+                _to = to.Date;
+            }
+            if (PageState.QueryString.ContainsKey("metric") && !string.IsNullOrEmpty(PageState.QueryString["metric"]))
+            {
+                _metric = PageState.QueryString["metric"].ToLower();
+            }
+
             await Display();
             _initialized = true;
         }
@@ -191,25 +204,25 @@
                     }
                     switch (_metric)
                     {
-                        case "Watchers":
+                        case "watcher":
                             _Projects = _Projects.OrderByDescending(item => item.Watchers).ToList();
                             break;
-                        case "Stars":
+                        case "star":
                             _Projects = _Projects.OrderByDescending(item => item.Stars).ToList();
                             break;
-                        case "Forks":
+                        case "fork":
                             _Projects = _Projects.OrderByDescending(item => item.Forks).ToList();
                             break;
-                        case "Contributors":
+                        case "contributor":
                             _Projects = _Projects.OrderByDescending(item => item.Contributors).ToList();
                             break;
-                        case "Commits":
+                        case "commit":
                             _Projects = _Projects.OrderByDescending(item => item.Commits).ToList();
                             break;
-                        case "Issues":
+                        case "issue":
                             _Projects = _Projects.OrderByDescending(item => item.Issues).ToList();
                             break;
-                        case "Pull Requests":
+                        case "pr":
                             _Projects = _Projects.OrderByDescending(item => item.PullRequests).ToList();
                             break;
                     }
@@ -267,30 +280,30 @@
                     labels.Add(FormatUrl(_Projects[i].Url));
                     switch (_metric)
                     {
-                        case "Watchers":
+                        case "watcher":
                             values.Add(_Projects[i].Watchers);
                             break;
-                        case "Stars":
+                        case "star":
                             values.Add(_Projects[i].Stars);
                             break;
-                        case "Forks":
+                        case "fork":
                             values.Add(_Projects[i].Forks);
                             break;
-                        case "Contributors":
+                        case "contributor":
                             values.Add(_Projects[i].Contributors);
                             break;
-                        case "Commits":
+                        case "commit":
                             values.Add(_Projects[i].Commits);
                             break;
-                        case "Issues":
+                        case "issue":
                             values.Add(_Projects[i].Issues);
                             break;
-                        case "Pull Requests":
+                        case "pr":
                             values.Add(_Projects[i].PullRequests);
                             break;
                     }
                 }
-                datasets.Add(new { label = _metric, data = values.ToArray(), fill = false, backgroundColor = colors });
+                datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor = colors });
                 object options = new { maintainAspectRatio = false, legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } } };
 
                 var interop = new Interop(JSRuntime);
@@ -311,5 +324,27 @@
         url = url.Replace(Common.UrlPrefix, "");
         url = url.Substring(url.IndexOf("/") + 1);
         return url;
+    }
+
+    private string FormatMetric(string metric)
+    {
+        switch (metric)
+        {
+            case "watcher":
+                return "Watchers";
+            case "star":
+                return "Stars";
+            case "fork":
+                return "Forks";
+            case "contributor":
+                return "Contributors";
+            case "commit":
+                return "Commits";
+            case "issue":
+                return "Issues";
+            case "pr":
+                return "Pull Requests";
+        }
+        return "";
     }
 }

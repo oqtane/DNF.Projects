@@ -22,4 +22,5 @@
 .DNF-Projects-View .chart {
     max-width: 800px;
     margin: 0 auto;
+    min-height: 300px;
 }

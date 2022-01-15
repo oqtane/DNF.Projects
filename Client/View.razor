@@ -10,22 +10,24 @@
 <div class="DNF-Projects-View">
     @if (_initialized)
     {
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" @onclick="Close">Return To Projects</button>
+        </div>
+        <br />
         <h2 class="text-center">@_name</h2>
         <div class="row justify-content-center mb-3">
-            <div class="col-sm-6">
+            <div class="col-sm-8">
                 <div class="input-group">
-                    <input type="date" class="form-control" @bind="@_from" />
+                    <input type="date" class="form-control" @bind="@_from" readonly />
                     <span class="input-group-text">To</span>
-                    <input type="date" class="form-control" @bind="@_to" />
-                    <button type="button" class="btn btn-primary" @onclick="Display">Display</button>
+                    <input type="date" class="form-control" @bind="@_to" readonly />
                 </div>
             </div>
         </div>
         <br />
         <div id="chart" class="chart"></div>
         <br />
-        <br />
-        <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)">
+        <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)" DisplayPages="1">
             <Header>
                 <th>Date</th>
                 <th>Watchers</th>
@@ -47,6 +49,10 @@
                 <td>@(context.PullRequests)</td>
             </Row>
         </Pager>
+        <br />
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" @onclick="Close">Return To Projects</button>
+        </div>
     }
 </div>
 
@@ -57,6 +63,7 @@
     string _name;
     DateTime _from = DateTime.Now.AddDays(-30);
     DateTime _to = DateTime.Now;
+    string _metric = "";
     bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -80,12 +87,16 @@
             {
                 _to = DateTime.Parse(PageState.QueryString["to"]);
             }
+            if (PageState.QueryString.ContainsKey("metric"))
+            {
+                _metric = PageState.QueryString["metric"];
+            }
 
             _id = Int32.Parse(PageState.QueryString["id"]);
             var project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
             if (project != null)
             {
-                _name = project.Url.Replace(Common.UrlPrefix, "");
+                _name = FormatUrl(project.Url);
                 await Display();
                 _initialized = true;
             }
@@ -153,7 +164,7 @@
                     index += 1;
                     datasets.Add(new { label = item.Key, data = item.Value.ToArray(), fill = false, borderColor = colors[index] });
                 }
-                object options = new {};
+                object options = new { maintainAspectRatio = false, legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } } };
 
                 var interop = new Interop(JSRuntime);
                 await interop.CreateChart("chart", "line", labels.ToArray(), datasets.ToArray(), options);
@@ -166,6 +177,17 @@
             await logger.LogError(ex, "Error Rendering Chart {Error}", ex.Message);
             AddModuleMessage("Error Rendering Chart", MessageType.Error);
         }
+    }
 
+    private void Close()
+    {
+        NavigationManager.NavigateTo(NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric));
+    }
+
+    private string FormatUrl(string url)
+    {
+        url = url.Replace(Common.UrlPrefix, "");
+        url = url.Substring(url.IndexOf("/") + 1);
+        return url;
     }
 }
