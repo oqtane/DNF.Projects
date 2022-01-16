@@ -61,55 +61,60 @@
     @if (_initialized && _Projects.Count > 0)
     {
         <div style="max-width: 500px; margin: auto;">
-        <Pager Items="@_Projects" DisplayPages="1" Class="table table-borderless table-sm">
-            <Header>
-                <th style="width: 1px;">&nbsp;</th>
-                @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
-                {
+            <Pager Items="@_Projects" DisplayPages="1" Class="table table-borderless table-sm">
+                <Header>
                     <th style="width: 1px;">&nbsp;</th>
-                    <th style="width: 1px;">&nbsp;</th>
-                }
-                <th>Name</th>
-                <th style="text-align:right">@FormatMetric(_metric)</th>
-            </Header>
-            <Row>
-                <td><ActionLink Action="View" IconName="@Icons.MagnifyingGlass" IconOnly="true" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric)" /></td>
-                @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
-                {
-                    <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
-                    <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
-                }
-                <td>@((MarkupString)("<a href=\"" + context.Url + "\" target=\"_new\">" + FormatUrl(context.Url) + "</a>"))</td>
-                <td style="text-align:right">
-                    @switch (_metric)
+                    @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
                     {
-                        case "watcher":
-                            @context.Watchers
-                            break;
-                        case "star":
-                            @context.Stars
-                            break;
-                        case "fork":
-                            @context.Forks
-                            break;
-                        case "contributor":
-                            @context.Contributors
-                            break;
-                        case "commit":
-                            @context.Commits
-                            break;
-                        case "issue":
-                            @context.Issues
-                            break;
-                        case "pr":
-                            @context.PullRequests
-                            break;
+                        <th style="width: 1px;">&nbsp;</th>
+                        <th style="width: 1px;">&nbsp;</th>
                     }
-                </td>
-            </Row>
-        </Pager>
+                    <th>Name</th>
+                    <th style="text-align:right">@FormatMetric(_metric)</th>
+                </Header>
+                <Row>
+                    <td><ActionLink Action="View" IconName="@Icons.MagnifyingGlass" IconOnly="true" EditMode="false" Parameters="@($"id=" + context.ProjectId.ToString() + "&from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric)" /></td>
+                    @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
+                    {
+                        <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
+                        <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
+                    }
+                    <td>@((MarkupString)("<a href=\"" + context.Url + "\" target=\"_new\">" + FormatUrl(context.Url) + "</a>"))</td>
+                    <td style="text-align:right">
+                        @switch (_metric)
+                        {
+                            case "watcher":
+                                @context.Watchers
+                                break;
+                            case "star":
+                                @context.Stars
+                                break;
+                            case "fork":
+                                @context.Forks
+                                break;
+                            case "contributor":
+                                @context.Contributors
+                                break;
+                            case "commit":
+                                @context.Commits
+                                break;
+                            case "issue":
+                                @context.Issues
+                                break;
+                            case "pr":
+                                @context.PullRequests
+                                break;
+                        }
+                    </td>
+                </Row>
+            </Pager>
         </div>
-        @_message
+        <br />
+        <div class="col text-center">
+            @((MarkupString)_link)
+            @_message
+        </div>
+        <br />
     }
 </div>
 
@@ -121,6 +126,7 @@
     string _metric = "pr";
     string _find = "";
     string _message = "";
+    string _link = "";
     bool _refresh = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -174,6 +180,7 @@
                     _message = "There Are No Matches For The Criteria Specified";
                 }
             }
+            _link = "";
             if (_Projects != null && _Projects.Count != 0)
             {
                 List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, _from.Date, _to.Date, ModuleState.ModuleId);
@@ -228,6 +235,7 @@
                     }
                 }
                 _message = "";
+                _link = "<a href=\"" + PageState.Uri.Scheme + "://" + PageState.Alias.Name + NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric) + "\">Snapshot Report Link</a>";
                 _refresh = true;
             }
             HideProgressIndicator();
