@@ -8,9 +8,9 @@ A series of video tutorials was recorded which explains the various aspects of t
 
 You can interact with a live demonstration of the module here:
 
-[.NET Foundation Project Activity](https://dnfprojects.azurewebsites.net/)
+[.NET Foundation Project Activity Trends](https://www.dnfprojects.com/)
 
-Note that you cannot run this module directly in your IDE. You need to ensure that the DNF.Projects folder is located in the same parent folder as the Oqtane framework:  
+Note that you cannot run this module directly in your IDE. You need to ensure that the DNF.Projects folder is located within the same parent folder as the Oqtane framework:  
 
 ```
 /username
