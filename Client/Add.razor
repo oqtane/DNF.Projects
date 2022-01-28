@@ -16,6 +16,17 @@
             <input id="_url" class="form-control" @bind="@_url" />
         </td>
     </tr>
+    <tr>
+        <td>
+            <Label For="_category" HelpText="Enter the project category">Project Category: </Label>
+        </td>
+        <td>
+            <select id="_category" class="form-control" @bind="@_category">
+                <option value="community">Community</option>
+                <option value="microsoft">Microsoft</option>
+            </select>
+        </td>
+    </tr>
 </table>
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
@@ -26,6 +37,7 @@
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
     string _url;
+    string _category;
 
     private async Task Save()
     {
@@ -37,6 +49,7 @@
                 Project.ModuleId = ModuleState.ModuleId;
                 Project.SiteId = ModuleState.SiteId;
                 Project.Url = _url;
+                Project.Category = _category;
                 Project = await ProjectService.AddProjectAsync(Project);
                 await logger.LogInformation("Project Added {Project}", Project);
                 NavigationManager.NavigateTo(NavigateUrl());

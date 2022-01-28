@@ -63,6 +63,7 @@
     string _name;
     DateTime _from = DateTime.Now.AddDays(-30);
     DateTime _to = DateTime.Now;
+    string _category = "";
     string _metric = "";
     bool _refresh = false;
 
@@ -86,6 +87,10 @@
             if (PageState.QueryString.ContainsKey("to"))
             {
                 _to = DateTime.Parse(PageState.QueryString["to"]);
+            }
+            if (PageState.QueryString.ContainsKey("category"))
+            {
+                _category = PageState.QueryString["category"];
             }
             if (PageState.QueryString.ContainsKey("metric"))
             {
@@ -181,7 +186,7 @@
 
     private void Close()
     {
-        NavigationManager.NavigateTo(NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric));
+        NavigationManager.NavigateTo(NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&category=" + _category + "&metric=" + _metric));
     }
 
     private string FormatUrl(string url)

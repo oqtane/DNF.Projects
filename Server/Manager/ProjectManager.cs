@@ -61,6 +61,7 @@ namespace DNF.Projects.Manager
                         _Project.ModuleId = module.ModuleId;
                         _Project.SiteId = module.SiteId;
                         _Project.Url = Project.Url;
+                        _Project.Category = Project.Category;
                         project = _Projects.AddProject(_Project);
                     }
                     if (Project.Date != null)

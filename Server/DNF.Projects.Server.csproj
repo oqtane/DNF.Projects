@@ -15,6 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\DNF.Projects.1.0.3.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\DNF.Projects.1.0.3.sql" />
     <EmbeddedResource Include="Scripts\DNF.Projects.1.0.0.sql" />
     <EmbeddedResource Include="Scripts\DNF.Projects.Uninstall.sql" />
   </ItemGroup>

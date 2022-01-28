@@ -8,36 +8,35 @@
 @inject NavigationManager NavigationManager
 
 <div class="DNF-Projects-Index">
-    @if (_initialized && _Projects.Count > 0)
+    @if (_initialized)
     {
         <div class="row justify-content-center">
-            <div class="col-sm-8">
-                <div class="container">
-                    <div class="row">
-                        <div class="mb-3">
-                            <div class="input-group">
-                                <input type="date" class="form-control" @bind="@_from" />
-                                <span class="input-group-text">To</span>
-                                <input type="date" class="form-control" @bind="@_to" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="mb-3">
-                            <div class="input-group">
-                                <select id="metric" class="form-control" @bind="@_metric">
-                                    <option value="watcher">Watchers</option>
-                                    <option value="star">Stars</option>
-                                    <option value="fork">Forks</option>
-                                    <option value="contributor">Contributors</option>
-                                    <option value="commit">Commits</option>
-                                    <option value="issue">Issues</option>
-                                    <option value="pr">Pull Requests</option>
-                                </select>
-                                <button type="button" class="btn btn-primary" @onclick="Display">Display</button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col-sm-12 col-md-8 mb-3">
+                <div class="input-group">
+                    <input type="date" class="form-control" @bind="@_from" />
+                    <span class="input-group-text">To</span>
+                    <input type="date" class="form-control" @bind="@_to" />
+                    <button type="button" class="btn btn-primary" @onclick="Display">Go</button>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-12 col-md-8 mb-3">
+                <div class="input-group">
+                    <select id="category" class="form-control" value="@_category" @onchange="(e => CategoryChanged(e))">
+                        <option value="community">Community</option>
+                        <option value="microsoft">Microsoft</option>
+                    </select>
+                    <span class="input-group-text"> </span>
+                    <select id="metric" class="form-control" value="@_metric" @onchange="(e => MetricChanged(e))">
+                        <option value="watcher">Watchers</option>
+                        <option value="star">Stars</option>
+                        <option value="fork">Forks</option>
+                        <option value="contributor">Contributors</option>
+                        <option value="commit">Commits</option>
+                        <option value="issue">Issues</option>
+                        <option value="pr">Pull Requests</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -45,7 +44,7 @@
         <div id="chart" class="chart"></div>
         <br />
         <div class="row justify-content-center mb-3">
-            <div class="col-sm-8">
+            <div class="col-sm-12 col-md-8">
                 <div class="input-group">
                     <input id="find" class="form-control" @bind="@_find" />
                     <button type="button" class="btn btn-primary" @onclick="Display">Search</button>
@@ -123,6 +122,7 @@
     List<Project> _Projects;
     DateTime _from = DateTime.Now.AddDays(-30);
     DateTime _to = DateTime.Now;
+    string _category = "community";
     string _metric = "pr";
     string _find = "";
     string _message = "";
@@ -148,6 +148,10 @@
             {
                 _to = to.Date;
             }
+            if (PageState.QueryString.ContainsKey("category") && !string.IsNullOrEmpty(PageState.QueryString["category"]))
+            {
+                _category = PageState.QueryString["category"].ToLower();
+            }
             if (PageState.QueryString.ContainsKey("metric") && !string.IsNullOrEmpty(PageState.QueryString["metric"]))
             {
                 _metric = PageState.QueryString["metric"].ToLower();
@@ -169,6 +173,7 @@
         {
             ShowProgressIndicator();                
             _Projects = await ProjectService.GetProjectsAsync(ModuleState.ModuleId);
+            _Projects = _Projects.Where(item => item.Category == _category).ToList();
             if (!string.IsNullOrEmpty(_find))
             {
                 if (_Projects.Where(item => item.Url.ToLower().Contains(_find.ToLower())).Any())
@@ -235,7 +240,7 @@
                     }
                 }
                 _message = "";
-                _link = "<a href=\"" + PageState.Uri.Scheme + "://" + PageState.Alias.Name + NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&metric=" + _metric) + "\">Snapshot Report Link</a>";
+                _link = "<a href=\"" + PageState.Uri.Scheme + "://" + PageState.Alias.Name + NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&category=" + _category + "&metric=" + _metric) + "\">Snapshot Report Link</a>";
                 _refresh = true;
             }
             HideProgressIndicator();
@@ -246,6 +251,18 @@
             await logger.LogError(ex, "Error Loading Project Activity {Error}", ex.Message);
             AddModuleMessage("Error Loading Project Activity", MessageType.Error);
         }
+    }
+
+    private async Task CategoryChanged(ChangeEventArgs args)
+    {
+        _category = (string)args.Value;
+        await Display();
+    }
+
+    private async Task MetricChanged(ChangeEventArgs args)
+    {
+        _metric = (string)args.Value;
+        await Display();
     }
 
     private async Task Reset()

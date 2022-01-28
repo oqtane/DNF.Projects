@@ -19,6 +19,17 @@
                 <input id="_url" class="form-control" @bind="@_url" />
             </td>
         </tr>
+    <tr>
+        <td>
+            <Label For="_category" HelpText="Enter the project category">Project Category: </Label>
+        </td>
+        <td>
+            <select id="_category" class="form-control" @bind="@_category">
+                <option value="community">Community</option>
+                <option value="microsoft">Microsoft</option>
+            </select>
+        </td>
+    </tr>
         <tr>
             <td>
                 <Label For="_date" HelpText="Date When Activity Metrics Were Recorded">Date: </Label>
@@ -99,6 +110,7 @@
     bool _initialized = false;
     int _id;
     string _url;
+    string _category;
     string _date;
     string _watchers;
     string _stars;
@@ -121,6 +133,7 @@
             if (Project != null)
             {
                 _url = Project.Url;
+                _category = Project.Category;
                 _createdby = Project.CreatedBy;
                 _createdon = Project.CreatedOn;
                 _modifiedby = Project.ModifiedBy;
@@ -142,9 +155,10 @@
             Project Project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
             if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
             {
-                if (Project.Url != _url)
+                if (Project.Url != _url || Project.Category != _category)
                 {
                     Project.Url = _url;
+                    Project.Category = _category;
                     await ProjectService.UpdateProjectAsync(Project);
                     await logger.LogInformation("Project Updated {Project}", Project);
                 }
