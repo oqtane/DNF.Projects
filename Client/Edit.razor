@@ -191,16 +191,13 @@
             Project Project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
             if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
             {
-                if (Project.Url != _url || Project.Category != _category)
-                {
-                    Project.Url = _url.Substring(0, 256);
-                    Project.Title = _title.Substring(0, 50);
-                    Project.Description = _description.Substring(0, 500);
-                    Project.Category = _category;
-                    Project.IsActive = bool.Parse(_isactive);
-                    await ProjectService.UpdateProjectAsync(Project);
-                    await logger.LogInformation("Project Updated {Project}", Project);
-                }
+                Project.Url = _url;
+                Project.Title = Common.TruncateString(_title, 50);
+                Project.Description = Common.TruncateString(_description, 500);
+                Project.Category = Common.TruncateString(_category, 50);
+                Project.IsActive = bool.Parse(_isactive);
+                await ProjectService.UpdateProjectAsync(Project);
+                await logger.LogInformation("Project Updated {Project}", Project);
 
                 DateTime date;
                 if (!string.IsNullOrEmpty(_date) && DateTime.TryParse(_date, out date))

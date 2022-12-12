@@ -69,10 +69,10 @@
                 Project Project = new Project();
                 Project.ModuleId = ModuleState.ModuleId;
                 Project.SiteId = ModuleState.SiteId;
-                Project.Url = _url.Substring(0, 256);
-                Project.Title = _title.Substring(0, 50);
-                Project.Description = _description.Substring(0, 500);
-                Project.Category = _category;
+                Project.Url = _url;
+                Project.Title = Common.TruncateString(_title, 50);
+                Project.Description = Common.TruncateString(_description, 500);
+                Project.Category = Common.TruncateString(_category, 50);
                 Project.IsActive = true;
                 Project = await ProjectService.AddProjectAsync(Project);
                 await logger.LogInformation("Project Added {Project}", Project);
