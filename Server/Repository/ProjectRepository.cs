@@ -56,7 +56,7 @@ namespace DNF.Projects.Repository
 
         public ProjectActivity AddProjectActivity(ProjectActivity ProjectActivity)
         {
-            ProjectActivity activity = _db.ProjectActivity.AsNoTracking().FirstOrDefault(item => item.ProjectId == ProjectActivity.ProjectId && item.Date == ProjectActivity.Date);
+            ProjectActivity activity = _db.ProjectActivity.AsNoTracking().FirstOrDefault(item => item.ProjectId == ProjectActivity.ProjectId && item.Date.Date == ProjectActivity.Date.Date);
             if (activity == null)
             {
                 _db.ProjectActivity.Add(ProjectActivity);

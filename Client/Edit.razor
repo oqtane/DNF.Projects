@@ -6,6 +6,7 @@
 @namespace DNF.Projects
 @inherits ModuleBase
 @inject IProjectService ProjectService
+@inject ISettingService SettingService
 @inject NavigationManager NavigationManager
 
 @if (_initialized)
@@ -13,23 +14,52 @@
     <table class="table table-borderless">
         <tr>
             <td>
-                <Label For="_url" HelpText="Github Repository Url">Github Url: </Label>
+                <Label For="_url" HelpText="Enter the Github Repository Url">Github Url: </Label>
             </td>
             <td>
                 <input id="_url" class="form-control" @bind="@_url" />
             </td>
         </tr>
-    <tr>
-        <td>
-            <Label For="_category" HelpText="Enter the project category">Project Category: </Label>
-        </td>
-        <td>
-            <select id="_category" class="form-control" @bind="@_category">
-                <option value="community">Community</option>
-                <option value="microsoft">Microsoft</option>
-            </select>
-        </td>
-    </tr>
+        <tr>
+            <td>
+                <Label For="_title" HelpText="Enter the project title">Title: </Label>
+            </td>
+            <td>
+                <input id="_title" class="form-control" @bind="@_title" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="_description" HelpText="Enter the project description">Description: </Label>
+            </td>
+            <td>
+                <textarea id="description" class="form-control" @bind="@_description" rows="3"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="_category" HelpText="Enter the project category">Category: </Label>
+            </td>
+            <td>
+                <select id="_category" class="form-select" @bind="@_category">
+                    @foreach (var category in SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(','))
+                    {
+                        <option value="@category.ToLower()">@category</option>
+                    }
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="_isactive" HelpText="Specify if the project is active">Active? </Label>
+            </td>
+            <td>
+                <select id="_isactive" class="form-select" @bind="@_isactive">
+                    <option value="True">Yes</option>
+                    <option value="False">No</option>
+                </select>
+            </td>
+        </tr>
         <tr>
             <td>
                 <Label For="_date" HelpText="Date When Activity Metrics Were Recorded">Date: </Label>
@@ -110,7 +140,10 @@
     bool _initialized = false;
     int _id;
     string _url;
+    string _title;
+    string _description;
     string _category;
+    string _isactive;
     string _date;
     string _watchers;
     string _stars;
@@ -133,7 +166,10 @@
             if (Project != null)
             {
                 _url = Project.Url;
+                _title = Project.Title;
+                _description = Project.Description;
                 _category = Project.Category;
+                _isactive = Project.IsActive.ToString();
                 _createdby = Project.CreatedBy;
                 _createdon = Project.CreatedOn;
                 _modifiedby = Project.ModifiedBy;
@@ -157,8 +193,11 @@
             {
                 if (Project.Url != _url || Project.Category != _category)
                 {
-                    Project.Url = _url;
+                    Project.Url = _url.Substring(0, 256);
+                    Project.Title = _title.Substring(0, 50);
+                    Project.Description = _description.Substring(0, 500);
                     Project.Category = _category;
+                    Project.IsActive = bool.Parse(_isactive);
                     await ProjectService.UpdateProjectAsync(Project);
                     await logger.LogInformation("Project Updated {Project}", Project);
                 }

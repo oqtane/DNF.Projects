@@ -60,8 +60,11 @@ namespace DNF.Projects.Manager
                         Project _Project = new Project();
                         _Project.ModuleId = module.ModuleId;
                         _Project.SiteId = module.SiteId;
-                        _Project.Url = Project.Url;
-                        _Project.Category = Project.Category;
+                        _Project.Url = Project.Url.Substring(0, 256);
+                        _Project.Title = Project.Title.Substring(0, 50);
+                        _Project.Description = Project.Description.Substring(0, 500);
+                        _Project.Category = Project.Category.Substring(0, 50);
+                        _Project.IsActive = Project.IsActive;
                         project = _Projects.AddProject(_Project);
                     }
                     if (Project.Date != null)

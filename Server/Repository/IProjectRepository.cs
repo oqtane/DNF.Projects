@@ -14,6 +14,5 @@ namespace DNF.Projects.Repository
 
         IEnumerable<ProjectActivity> GetProjectActivity(int ProjectId, DateTime FromDate, DateTime ToDate);
         ProjectActivity AddProjectActivity(ProjectActivity ProjectActivity);
-
     }
 }

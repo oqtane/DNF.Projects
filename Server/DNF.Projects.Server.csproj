@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
     <Product>DNF.Projects</Product>
     <Authors>DNF</Authors>
     <Company>DNF</Company>
@@ -15,21 +15,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\DNF.Projects.1.0.3.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Scripts\DNF.Projects.1.0.3.sql" />
     <EmbeddedResource Include="Scripts\DNF.Projects.1.0.0.sql" />
+    <EmbeddedResource Include="Scripts\DNF.Projects.1.0.3.sql" />
+    <EmbeddedResource Include="Scripts\DNF.Projects.1.0.4.sql" />
+    <EmbeddedResource Include="Scripts\DNF.Projects.1.0.5.sql" />
     <EmbeddedResource Include="Scripts\DNF.Projects.Uninstall.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.3" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
   </ItemGroup>
 
@@ -38,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Oqtane.Server" Version="3.0.0" />
-    <PackageReference Include="Oqtane.Shared" Version="3.0.0" />
+    <PackageReference Include="Oqtane.Server" Version="3.2.0" />
+    <PackageReference Include="Oqtane.Shared" Version="3.2.0" />
   </ItemGroup>
 </Project>

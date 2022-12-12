@@ -28,6 +28,14 @@
             <input id="_email" type="text" class="form-control" @bind="@_email" />
         </td>
     </tr>
+    <tr>
+        <td>
+            <Label For="_categories" HelpText="Enter a comma delimited list of categories">Categories: </Label>
+        </td>
+        <td>
+            <input id="_categories" type="text" class="form-control" @bind="@_categories" />
+        </td>
+    </tr>
 </table>
 
 @code {
@@ -36,6 +44,7 @@
     string _token;
     string _name;
     string _email;
+    string _categories;
 
     protected override void OnInitialized()
     {
@@ -44,6 +53,7 @@
             _token = SettingService.GetSetting(ModuleState.Settings, "GithubToken", "");
             _name = SettingService.GetSetting(ModuleState.Settings, "NotifyName", "");
             _email = SettingService.GetSetting(ModuleState.Settings, "NotifyEmail", "");
+            _categories = SettingService.GetSetting(ModuleState.Settings, "Categories", "default");
         }
         catch (Exception ex)
         {
@@ -59,6 +69,7 @@
             settings = SettingService.SetSetting(settings, "GithubToken", _token, true);
             settings = SettingService.SetSetting(settings, "NotifyName", _name, true);
             settings = SettingService.SetSetting(settings, "NotifyEmail", _email, true);
+            settings = SettingService.SetSetting(settings, "Categories", _categories, true);
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)

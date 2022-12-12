@@ -10,12 +10,15 @@ namespace DNF.Projects.Models
         public int ProjectId { get; set; }
         public int ModuleId { get; set; }
         public int SiteId { get; set; }
-        public string Url { get; set; }
+		public string Url { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
         public string Category { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public string ModifiedBy { get; set; }
         public DateTime ModifiedOn { get; set; }
+        public bool IsActive { get; set; }
 
         [NotMapped]
         public DateTime? Date { get; set; }

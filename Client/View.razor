@@ -11,10 +11,17 @@
     @if (_initialized)
     {
         <div class="col text-center">
-            <button type="button" class="btn btn-secondary" @onclick="Close">Return To Projects</button>
+            <NavLink class="btn btn-secondary" href="@CloseUrl()">Return To Projects</NavLink>
         </div>
         <br />
         <h2 class="text-center">@_name</h2>
+        @if (!string.IsNullOrEmpty(_description))
+        {
+            <div class="text-center">
+                @_description
+            </div>
+            <br />
+        }
         <div class="row justify-content-center mb-3">
             <div class="col-sm-8">
                 <div class="input-group">
@@ -51,7 +58,7 @@
         </Pager>
         <br />
         <div class="col text-center">
-            <button type="button" class="btn btn-secondary" @onclick="Close">Return To Projects</button>
+            <NavLink class="btn btn-secondary" href="@CloseUrl()">Return To Projects</NavLink>
         </div>
     }
 </div>
@@ -63,9 +70,10 @@
     string _name;
     DateTime _from = DateTime.Now.AddDays(-30);
     DateTime _to = DateTime.Now;
-    string _category = "";
-    string _metric = "";
+    string _description = "";
     bool _refresh = false;
+
+    public override string UrlParametersTemplate => "/{id}/{from}/{to}";
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -80,28 +88,24 @@
     {
         try
         {
-            if (PageState.QueryString.ContainsKey("from"))
+            if (UrlParameters.ContainsKey("id"))
             {
-                _from = DateTime.Parse(PageState.QueryString["from"]);
+                _id = int.Parse(UrlParameters["id"]);
             }
-            if (PageState.QueryString.ContainsKey("to"))
+            if (UrlParameters.ContainsKey("from"))
             {
-                _to = DateTime.Parse(PageState.QueryString["to"]);
+                _from = DateTime.Parse(UrlParameters["from"]);
             }
-            if (PageState.QueryString.ContainsKey("category"))
+            if (UrlParameters.ContainsKey("to"))
             {
-                _category = PageState.QueryString["category"];
-            }
-            if (PageState.QueryString.ContainsKey("metric"))
-            {
-                _metric = PageState.QueryString["metric"];
+                _to = DateTime.Parse(UrlParameters["to"]);
             }
 
-            _id = Int32.Parse(PageState.QueryString["id"]);
             var project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
             if (project != null)
             {
-                _name = FormatUrl(project.Url);
+                _name = FormatUrl(project.Url, project.Title);
+                _description = project.Description;
                 await Display();
                 _initialized = true;
             }
@@ -184,15 +188,22 @@
         }
     }
 
-    private void Close()
-    {
-        NavigationManager.NavigateTo(NavigateUrl(PageState.Page.Path, "from=" + _from.ToString("MMM-dd-yyyy") + "&to=" + _to.ToString("MMM-dd-yyyy") + "&category=" + _category + "&metric=" + _metric));
+    private string FormatUrl(string url, string title)
+    {        
+        if (string.IsNullOrEmpty(title))
+        {
+            url = url.Replace(Common.UrlPrefix, "");
+            url = url.Substring(url.IndexOf("/") + 1);
+        }
+        else
+        {
+            url = title;
+        }
+        return url;
     }
 
-    private string FormatUrl(string url)
+    private string CloseUrl()
     {
-        url = url.Replace(Common.UrlPrefix, "");
-        url = url.Substring(url.IndexOf("/") + 1);
-        return url;
+        return (!string.IsNullOrEmpty(PageState.ReturnUrl)) ? PageState.ReturnUrl : NavigateUrl();
     }
 }
