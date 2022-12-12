@@ -69,7 +69,7 @@
             settings = SettingService.SetSetting(settings, "GithubToken", _token, true);
             settings = SettingService.SetSetting(settings, "NotifyName", _name, true);
             settings = SettingService.SetSetting(settings, "NotifyEmail", _email, true);
-            settings = SettingService.SetSetting(settings, "Categories", _categories, true);
+            settings = SettingService.SetSetting(settings, "Categories", _categories, false);
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)
