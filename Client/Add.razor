@@ -61,13 +61,25 @@
     string[] _categories;
     string _category;
 
-    private async Task Save()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
             _categories = SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(',');
             _category = _categories[0].ToLower();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Project Categories {Error}", ex.Message);
+            AddModuleMessage("Error Loading Project", MessageType.Error);
+        }
+    }
 
+
+    private async Task Save()
+    {
+        try
+        {
             if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
             {
                 Project Project = new Project();
