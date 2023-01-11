@@ -39,7 +39,7 @@
         </td>
         <td>
             <select id="_category" class="form-select" @bind="@_category">
-                @foreach (var category in SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(','))
+                @foreach (var category in _categories)
                 {
                     <option value="@category.ToLower()">@category</option>
                 }
@@ -58,12 +58,16 @@
     string _url;
     string _title;
     string _description;
+    string[] _categories;
     string _category;
 
     private async Task Save()
     {
         try
         {
+            _categories = SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(',');
+            _category = _categories[0].ToLower();
+
             if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
             {
                 Project Project = new Project();

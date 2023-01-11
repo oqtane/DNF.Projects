@@ -42,7 +42,7 @@
             </td>
             <td>
                 <select id="_category" class="form-select" @bind="@_category">
-                    @foreach (var category in SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(','))
+                    @foreach (var category in _categories)
                     {
                         <option value="@category.ToLower()">@category</option>
                     }
@@ -142,6 +142,7 @@
     string _url;
     string _title;
     string _description;
+    string[] _categories;
     string _category;
     string _isactive;
     string _date;
@@ -161,6 +162,9 @@
     {
         try
         {
+            _categories = SettingService.GetSetting(ModuleState.Settings, "Categories", "Default").Split(',');
+            _category = _categories[0].ToLower();
+
             _id = Int32.Parse(PageState.QueryString["id"]);
             Project Project = await ProjectService.GetProjectAsync(_id, ModuleState.ModuleId);
             if (Project != null)
@@ -168,7 +172,10 @@
                 _url = Project.Url;
                 _title = Project.Title;
                 _description = Project.Description;
-                _category = Project.Category;
+                if (_categories.Contains(Project.Category))
+                {
+                    _category = Project.Category;
+                }
                 _isactive = Project.IsActive.ToString();
                 _createdby = Project.CreatedBy;
                 _createdon = Project.CreatedOn;
