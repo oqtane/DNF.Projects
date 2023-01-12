@@ -28,11 +28,14 @@ namespace DNF.Projects.Controllers
         public IEnumerable<ProjectActivity> Get(string projectid, string fromdate, string todate)
         {
             List<ProjectActivity> activities = new List<ProjectActivity>();
-            foreach(var activity in _Projects.GetProjectActivity(int.Parse(projectid), DateTime.Parse(fromdate).Date, DateTime.Parse(todate).Date))
+            if (int.TryParse(projectid, out _) && DateTime.TryParse(fromdate, out _) && DateTime.TryParse(todate, out _))
             {
-                if (activity.Project.ModuleId == _authEntityId[EntityNames.Module])
+                foreach (var activity in _Projects.GetProjectActivity(int.Parse(projectid), DateTime.Parse(fromdate).Date, DateTime.Parse(todate).Date))
                 {
-                    activities.Add(activity);
+                    if (activity.Project.ModuleId == _authEntityId[EntityNames.Module])
+                    {
+                        activities.Add(activity);
+                    }
                 }
             }
             return activities;
