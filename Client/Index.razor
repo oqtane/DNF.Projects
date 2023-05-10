@@ -78,7 +78,7 @@
                 <Pager Items="@_Projects" DisplayPages="1" Class="table table-borderless table-sm" CurrentPage="@_page.ToString()" OnPageChange="OnPageChange">
                     <Header>
                         <th style="width: 1px;">&nbsp;</th>
-                        @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
+                        @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.PermissionList))
                         {
                             <th style="width: 1px;">&nbsp;</th>
                             <th style="width: 1px;">&nbsp;</th>
@@ -89,7 +89,7 @@
                     <Row>
                         <td><ActionLink Action="View" IconName="@Icons.MagnifyingGlass" IconOnly="true" EditMode="false" Parameters="@($"/{context.ProjectId}/{_from.ToString("MMM-dd-yyyy")}/{_to.ToString("MMM-dd-yyyy")}")" ReturnUrl="@(NavigateUrl(PageState.Page.Path, AddUrlParameters(_from.ToString("MMM-dd-yyyy"), _to.ToString("MMM-dd-yyyy"), _category, _metric, _page, _find)))" /></td>
 
-                        @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions))
+                        @if (UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.PermissionList))
                         {
                             <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ProjectId.ToString())" /></td>
                             <td><ActionDialog Header="Delete Project" Message="@("Are You Sure You Wish To Delete This Project?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>

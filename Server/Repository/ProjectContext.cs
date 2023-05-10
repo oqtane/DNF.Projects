@@ -12,7 +12,7 @@ namespace DNF.Projects.Repository
         public virtual DbSet<Project> Project { get; set; }
         public virtual DbSet<ProjectActivity> ProjectActivity { get; set; }
 
-        public ProjectContext(ITenantManager tenantManager, IHttpContextAccessor accessor) : base(tenantManager, accessor)
+        public ProjectContext(IDBContextDependencies DBContextDependencies) : base(DBContextDependencies)
         {
             // ContextBase handles multi-tenant database connections
         }
