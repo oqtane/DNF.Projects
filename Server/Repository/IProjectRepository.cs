@@ -11,8 +11,5 @@ namespace DNF.Projects.Repository
         Project AddProject(Project Project);
         Project UpdateProject(Project Project);
         void DeleteProject(int ProjectId);
-
-        IEnumerable<ProjectActivity> GetProjectActivity(int ProjectId, DateTime FromDate, DateTime ToDate);
-        ProjectActivity AddProjectActivity(ProjectActivity ProjectActivity);
     }
 }

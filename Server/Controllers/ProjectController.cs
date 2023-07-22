@@ -8,17 +8,19 @@ using DNF.Projects.Models;
 using DNF.Projects.Repository;
 using Microsoft.AspNetCore.Http;
 using Oqtane.Controllers;
+using Oqtane.Models;
+using System.Net;
 
 namespace DNF.Projects.Controllers
 {
     [Route(ControllerRoutes.ApiRoute)]
     public class ProjectController : ModuleControllerBase
     {
-        private readonly IProjectRepository _Projects;
+        private readonly IProjectRepository _ProjectRepository;
 
-        public ProjectController(IProjectRepository Projects, ILogManager logger, IHttpContextAccessor accessor) : base(logger, accessor)
+        public ProjectController(IProjectRepository ProjectRepository, ILogManager logger, IHttpContextAccessor accessor) : base(logger, accessor)
         {
-            _Projects = Projects;
+            _ProjectRepository = ProjectRepository;
         }
 
         // GET: api/<controller>?moduleid=x
@@ -28,10 +30,12 @@ namespace DNF.Projects.Controllers
         {
             if (int.Parse(moduleid) == _authEntityId[EntityNames.Module])
             {
-                return _Projects.GetProjects(int.Parse(moduleid), -1);
+                return _ProjectRepository.GetProjects(int.Parse(moduleid), -1);
             }
             else
             {
+                _logger.Log(LogLevel.Error, this, LogFunction.Security, "Unauthorized Project Get Attempt {ModuleId}", moduleid);
+                HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return null;
             }
         }
@@ -41,12 +45,24 @@ namespace DNF.Projects.Controllers
         [Authorize(Policy = "ViewModule")]
         public Project Get(int id)
         {
-            Project Project = _Projects.GetProject(id);
-            if (Project != null && Project.ModuleId != _authEntityId[EntityNames.Module])
+            Project Project = _ProjectRepository.GetProject(id);
+            if (Project != null && Project.ModuleId == _authEntityId[EntityNames.Module])
             {
-                Project = null;
+                return Project;
             }
-            return Project;
+            else
+            {
+                if (Project != null)
+                {
+                    _logger.Log(LogLevel.Error, this, LogFunction.Security, "Unauthorized Project Get Attempt {ProjectId}", id);
+                    HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                }
+                else
+                {
+                    HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                }
+                return null;
+            }
         }
 
         // POST api/<controller>
@@ -56,8 +72,14 @@ namespace DNF.Projects.Controllers
         {
             if (ModelState.IsValid && Project.ModuleId == _authEntityId[EntityNames.Module])
             {
-                Project = _Projects.AddProject(Project);
+                Project = _ProjectRepository.AddProject(Project);
                 _logger.Log(LogLevel.Information, this, LogFunction.Create, "Project Added {Project}", Project);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, this, LogFunction.Security, "Unauthorized Project Post Attempt {Project}", Project);
+                HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                Project = null;
             }
             return Project;
         }
@@ -69,8 +91,14 @@ namespace DNF.Projects.Controllers
         {
             if (ModelState.IsValid && Project.ModuleId == _authEntityId[EntityNames.Module])
             {
-                Project = _Projects.UpdateProject(Project);
+                Project = _ProjectRepository.UpdateProject(Project);
                 _logger.Log(LogLevel.Information, this, LogFunction.Update, "Project Updated {Project}", Project);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, this, LogFunction.Security, "Unauthorized Project Put Attempt {Project}", Project);
+                HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                Project = null;
             }
             return Project;
         }
@@ -80,11 +108,16 @@ namespace DNF.Projects.Controllers
         [Authorize(Policy = "EditModule")]
         public void Delete(int id)
         {
-            Project Project = _Projects.GetProject(id);
+            Project Project = _ProjectRepository.GetProject(id);
             if (Project != null && Project.ModuleId ==_authEntityId[EntityNames.Module])
             {
-                _Projects.DeleteProject(id);
+                _ProjectRepository.DeleteProject(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Project Deleted {ProjectId}", id);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, this, LogFunction.Security, "Unauthorized Project Delete Attempt {ProjectId}", id);
+                HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             }
         }
     }

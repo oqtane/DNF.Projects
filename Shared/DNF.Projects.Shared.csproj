@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>    
-    <LangVersion>7.3</LangVersion>
-    <Version>1.0.5</Version>
-    <Product>DNF.Projects</Product>
-    <Authors>DNF</Authors>
-    <Company>DNF</Company>
-    <Description></Description>
-    <Copyright>DNF</Copyright>
-    <AssemblyName>DNF.Projects.Shared.Oqtane</AssemblyName>
+    <TargetFramework>net7.0</TargetFramework>    
+    <Version>1.0.6</Version>
+	<Authors>Shaun Walker</Authors>
+	<Company>.NET Foundation</Company>
+	<Description></Description>
+	<Product>DNF.Projects</Product>
+	<Copyright>.NET Foundation</Copyright>
+	<AssemblyName>DNF.Projects.Shared.Oqtane</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Oqtane.Shared" Version="3.4.3" />
+    <PackageReference Include="Oqtane.Shared" Version="4.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,16 +1,18 @@
 @using DNF.Projects.Services
 @using DNF.Projects.Models
 @using DNF.Projects.Shared
+@using System.Globalization;
 
 @namespace DNF.Projects
 @inherits ModuleBase
 @inject IProjectService ProjectService
+@inject IProjectActivityService ProjectActivityService
 @inject ISettingService SettingService
 @inject NavigationManager NavigationManager
 
-<div class="DNF-Projects-Index">
-    @if (_initialized)
-    {
+@if (_initialized)
+{
+    <div class="DNF-Projects-Index">
         <div class="row justify-content-center">
             <div class="col-sm-12 col-md-8 mb-3">
                 <div class="input-group">
@@ -44,7 +46,7 @@
             </div>
         </div>
         <br />
-        @if (_Projects.Count > 0)
+        @if (_Projects != null && _Projects.Count > 0)
         {
             <div id="chart" class="chart"></div>
             <br />
@@ -56,6 +58,7 @@
             </div>
             <br />
         }
+
         <div class="row justify-content-center mb-3">
             <div class="col-sm-12 col-md-8">
                 <div class="input-group">
@@ -66,13 +69,10 @@
             </div>
         </div>
         <br />
-    }
 
-    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
+        <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Project" /><br />
 
-    @if (_initialized)
-    {
-        @if (_Projects.Count > 0)
+        @if (_Projects != null && _Projects.Count > 0)
         {
             <div style="max-width: 500px; margin: auto;">
                 <Pager Items="@_Projects" DisplayPages="1" Class="table table-borderless table-sm" CurrentPage="@_page.ToString()" OnPageChange="OnPageChange">
@@ -129,9 +129,10 @@
                 @((MarkupString)_link)
             </div>
         }
-    }
-</div>
-<br />
+
+    </div>
+    <br />
+}
 
 @code {
     bool _initialized = false;
@@ -185,13 +186,13 @@
                     item.Description.ToLower().Contains(_find.ToLower())).ToList();
                 if (_Projects.Count == 0)
                 {
-                    _message = "There Are No Matches For The Criteria Specified";
+                    _message = "There Are No Projects Matching The Criteria Specified";
                 }
             }
             _link = "";
             if (_Projects != null && _Projects.Count != 0)
             {
-                List<ProjectActivity> ProjectActivity = await ProjectService.GetProjectActivityAsync(-1, _from.Date, _to.Date, ModuleState.ModuleId);
+                List<ProjectActivity> ProjectActivity = await ProjectActivityService.GetProjectActivityAsync(-1, _from.Date, _to.Date, ModuleState.ModuleId);
                 if (ProjectActivity != null)
                 {
                     foreach (var project in _Projects)
@@ -412,11 +413,11 @@
         }
 
         // legacy versions used querystring
-        if (PageState.QueryString.ContainsKey("from") && DateTime.TryParse(PageState.QueryString["from"], out DateTime from))
+        if (PageState.QueryString.ContainsKey("from") && DateTime.TryParseExact(PageState.QueryString["from"], "MMM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime from))
         {
             _from = from.Date;
         }
-        if (PageState.QueryString.ContainsKey("to") && DateTime.TryParse(PageState.QueryString["to"], out DateTime to))
+        if (PageState.QueryString.ContainsKey("to") && DateTime.TryParseExact(PageState.QueryString["to"], "MMM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime to))
         {
             _to = to.Date;
         }

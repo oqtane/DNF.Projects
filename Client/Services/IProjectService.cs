@@ -16,9 +16,5 @@ namespace DNF.Projects.Services
         Task<Project> UpdateProjectAsync(Project Project);
 
         Task DeleteProjectAsync(int ProjectId, int ModuleId);
-
-        Task<List<ProjectActivity>> GetProjectActivityAsync(int ProjectId, DateTime FromDate, DateTime ToDate, int ModuleId);
-
-        Task<ProjectActivity> AddProjectActivityAsync(ProjectActivity ProjectActivity, int ModuleId);
     }
 }

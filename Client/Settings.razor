@@ -3,40 +3,32 @@
 @inject ISettingService SettingService
 @implements Oqtane.Interfaces.ISettingsControl
 
-<table class="table table-borderless">
-    <tr>
-        <td>
-            <Label For="_token" HelpText="Enter personal access token from Github">Github Token: </Label>
-        </td>
-        <td>
+<div class="container">
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="_token" HelpText="Enter personal access token from Github">Github Token: </Label>
+        <div class="col-sm-9">
             <input id="_token" type="text" class="form-control" @bind="@_token" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <Label For="_name" HelpText="Enter name of the person to notify when there are issues accessing the Github API">Notify Name: </Label>
-        </td>
-        <td>
+        </div>
+    </div>
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="_name" HelpText="Enter name of the person to notify when there are issues accessing the Github API">Notify Name: </Label>
+        <div class="col-sm-9">
             <input id="_name" type="text" class="form-control" @bind="@_name" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <Label For="_email" HelpText="Enter email address to notify when there are issues accessing the Github API">Notify Email: </Label>
-        </td>
-        <td>
+        </div>
+    </div>
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="_email" HelpText="Enter email address to notify when there are issues accessing the Github API">Notify Email: </Label>
+        <div class="col-sm-9">
             <input id="_email" type="text" class="form-control" @bind="@_email" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <Label For="_categories" HelpText="Enter a comma delimited list of categories">Categories: </Label>
-        </td>
-        <td>
+        </div>
+    </div>
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="_categories" HelpText="Enter a comma delimited list of categories">Categories: </Label>
+        <div class="col-sm-9">
             <input id="_categories" type="text" class="form-control" @bind="@_categories" />
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
+</div>
 
 @code {
     public override string Title => "Project Settings";

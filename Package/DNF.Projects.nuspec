@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>DNF.Projects</id>
-    <version>1.0.5</version>
-    <authors>DNF</authors>
-    <owners>DNF</owners>
-    <title>Projects</title>
-    <description>Projects</description>
-    <copyright>DNF</copyright>
+    <version>1.0.6</version>
+    <authors>Shaun Walker</authors>
+    <owners>.NET Foundation</owners>
+    <title>DNF.Projects</title>
+    <description>GitHub Project Trends</description>
+    <copyright>.NET Foundation</copyright>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/oqtane/oqtane.framework</projectUrl>
@@ -16,17 +16,17 @@
     <releaseNotes></releaseNotes>
     <summary></summary>
     <dependencies>
-      <dependency id="Oqtane.Framework" version="3.0.0" />
+      <dependency id="Oqtane.Framework" version="4.0.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Client\bin\Release\net6.0\DNF.Projects.Client.Oqtane.dll" target="lib\net6.0" /> 
-    <file src="..\Client\bin\Release\net6.0\DNF.Projects.Client.Oqtane.pdb" target="lib\net6.0" /> 
-    <file src="..\Server\bin\Release\net6.0\DNF.Projects.Server.Oqtane.dll" target="lib\net6.0" /> 
-    <file src="..\Server\bin\Release\net6.0\DNF.Projects.Server.Oqtane.pdb" target="lib\net6.0" />
-    <file src="..\Server\bin\Release\net6.0\RestSharp.dll" target="lib\net6.0" />
-    <file src="..\Shared\bin\Release\net6.0\DNF.Projects.Shared.Oqtane.dll" target="lib\net6.0" /> 
-    <file src="..\Shared\bin\Release\net6.0\DNF.Projects.Shared.Oqtane.pdb" target="lib\net6.0" /> 
+    <file src="..\Client\bin\Release\net7.0\DNF.Projects.Client.Oqtane.dll" target="lib\net7.0" /> 
+    <file src="..\Client\bin\Release\net7.0\DNF.Projects.Client.Oqtane.pdb" target="lib\net7.0" /> 
+    <file src="..\Server\bin\Release\net7.0\DNF.Projects.Server.Oqtane.dll" target="lib\net7.0" /> 
+    <file src="..\Server\bin\Release\net7.0\DNF.Projects.Server.Oqtane.pdb" target="lib\net7.0" />
+    <file src="..\Server\bin\Release\net7.0\RestSharp.dll" target="lib\net7.0" />
+    <file src="..\Shared\bin\Release\net7.0\DNF.Projects.Shared.Oqtane.dll" target="lib\net7.0" /> 
+    <file src="..\Shared\bin\Release\net7.0\DNF.Projects.Shared.Oqtane.pdb" target="lib\net7.0" /> 
     <file src="..\Server\wwwroot\**\*.*" target="wwwroot" />
     <file src="icon.png" target="" />
   </files>

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading;
 using DNF.Projects.Models;
 using DNF.Projects.Repository;
 using DNF.Projects.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using Oqtane.Infrastructure;
 using Oqtane.Models;
 using Oqtane.Repository;
@@ -36,6 +36,7 @@ namespace DNF.Projects.Jobs
             var siteRepository = provider.GetRequiredService<ISiteRepository>();
             var settingRepository = provider.GetRequiredService<ISettingRepository>();
             var projectRepository = provider.GetRequiredService<IProjectRepository>();
+            var projectActivityRepository = provider.GetRequiredService<IProjectActivityRepository>();
             var notificationRepository = provider.GetRequiredService<INotificationRepository>();
 
             // iterate through sites for this tenant
@@ -66,7 +67,7 @@ namespace DNF.Projects.Jobs
                         activity.Date = DateTime.Now.Date;
 
                         // get metrics from previous day to initialize
-                        var yesterday = projectRepository.GetProjectActivity(project.ProjectId, activity.Date.AddDays(-1).Date, activity.Date.Date).FirstOrDefault();
+                        var yesterday = projectActivityRepository.GetProjectActivity(project.ProjectId, activity.Date.AddDays(-1).Date, activity.Date.Date).FirstOrDefault();
                         if (yesterday != null)
                         {
                             activity.Stars = yesterday.Stars;
@@ -82,8 +83,8 @@ namespace DNF.Projects.Jobs
 
                         RestRequest request = null;
                         IRestResponse response = null;
-                        JObject jObject;
-                        JArray jArray;
+                        System.Text.Json.Nodes.JsonObject jObject;
+                        System.Text.Json.Nodes.JsonArray jArray;
                         bool error = false;
 
                         // get stars, forks, watchers
@@ -92,10 +93,10 @@ namespace DNF.Projects.Jobs
                             request = new RestRequest("repos/" + resource);
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
-                            jObject = JObject.Parse(response.Content);
-                            activity.Stars = int.Parse(jObject.GetValue("stargazers_count").ToString());
-                            activity.Forks = int.Parse(jObject.GetValue("forks_count").ToString());
-                            activity.Watchers = int.Parse(jObject.GetValue("subscribers_count").ToString());
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.Stars = int.Parse(jObject["stargazers_count"].ToString());
+                            activity.Forks = int.Parse(jObject["forks_count"].ToString());
+                            activity.Watchers = int.Parse(jObject["subscribers_count"].ToString());
                         }
                         catch (Exception ex)
                         {
@@ -114,13 +115,13 @@ namespace DNF.Projects.Jobs
                                 request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
                                 request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                                 response = client.Execute(request);
-                                jArray = JArray.Parse(response.Content);
+                                jArray = JsonNode.Parse(response.Content).AsArray();
                                 if (jArray.Count > 0)
                                 {
-                                    foreach (JObject contributor in jArray)
+                                    foreach (System.Text.Json.Nodes.JsonObject contributor in jArray)
                                     {
                                         contributors += 1;
-                                        commits += int.Parse(contributor.GetValue("contributions").ToString());
+                                        commits += int.Parse(contributor["contributions"].ToString());
                                     }
                                     Page += 1;
                                 }
@@ -144,14 +145,14 @@ namespace DNF.Projects.Jobs
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:open");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
-                            jObject = JObject.Parse(response.Content);
-                            activity.Issues = int.Parse(jObject.GetValue("total_count").ToString());
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.Issues = int.Parse(jObject["total_count"].ToString());
 
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
-                            jObject = JObject.Parse(response.Content);
-                            activity.Issues += int.Parse(jObject.GetValue("total_count").ToString());
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.Issues += int.Parse(jObject["total_count"].ToString());
 
                             searchrequests += 2;
                         }
@@ -167,14 +168,14 @@ namespace DNF.Projects.Jobs
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:open");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
-                            jObject = JObject.Parse(response.Content);
-                            activity.PullRequests = int.Parse(jObject.GetValue("total_count").ToString());
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.PullRequests = int.Parse(jObject["total_count"].ToString());
 
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:closed");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
-                            jObject = JObject.Parse(response.Content);
-                            activity.PullRequests += int.Parse(jObject.GetValue("total_count").ToString());
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.PullRequests += int.Parse(jObject["total_count"].ToString());
 
                             searchrequests += 2;
                         }
@@ -184,7 +185,7 @@ namespace DNF.Projects.Jobs
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
-                        projectRepository.AddProjectActivity(activity);
+                        projectActivityRepository.AddProjectActivity(activity);
 
                         if (error && settings.ContainsKey("NotifyName") && settings.ContainsKey("NotifyEmail"))
                         {

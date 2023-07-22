@@ -6,136 +6,119 @@
 @namespace DNF.Projects
 @inherits ModuleBase
 @inject IProjectService ProjectService
+@inject IProjectActivityService ProjectActivityService
 @inject ISettingService SettingService
 @inject NavigationManager NavigationManager
 
 @if (_initialized)
 {
-    <table class="table table-borderless">
-        <tr>
-            <td>
-                <Label For="_url" HelpText="Enter the Github Repository Url">Github Url: </Label>
-            </td>
-            <td>
-                <input id="_url" class="form-control" @bind="@_url" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_title" HelpText="Enter the project title">Title: </Label>
-            </td>
-            <td>
-                <input id="_title" class="form-control" @bind="@_title" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_description" HelpText="Enter the project description">Description: </Label>
-            </td>
-            <td>
-                <textarea id="description" class="form-control" @bind="@_description" rows="3"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_category" HelpText="Enter the project category">Category: </Label>
-            </td>
-            <td>
-                <select id="_category" class="form-select" @bind="@_category">
-                    @foreach (var category in _categories)
-                    {
-                        <option value="@category.ToLower()">@category</option>
-                    }
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_isactive" HelpText="Specify if the project is active">Active? </Label>
-            </td>
-            <td>
-                <select id="_isactive" class="form-select" @bind="@_isactive">
-                    <option value="True">Yes</option>
-                    <option value="False">No</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_date" HelpText="Date When Activity Metrics Were Recorded">Date: </Label>
-            </td>
-            <td>
-                <input id="_date" class="form-control" @bind="@_date" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_watcers" HelpText="Number of Watchers">Watchers: </Label>
-            </td>
-            <td>
-                <input id="_watchers" class="form-control" @bind="@_watchers" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_stars" HelpText="Number of Stars">Stars: </Label>
-            </td>
-            <td>
-                <input id="_stars" class="form-control" @bind="@_stars" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label for="_forks" HelpText="Number of Forks">Forks: </Label>
-            </td>
-            <td>
-                <input id="_forks" class="form-control" @bind="@_forks" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_contributors" HelpText="Number of Contributors">Contributors: </Label>
-            </td>
-            <td>
-                <input id="_contributors" class="form-control" @bind="@_contributors" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_commits" HelpText="Number of Commits">Commits: </Label>
-            </td>
-            <td>
-                <input id="_commits" class="form-control" @bind="@_commits" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_issues" HelpText="Number of Issues (Open + Closed)">Issues: </Label>
-            </td>
-            <td>
-                <input id="_issues" class="form-control" @bind="@_issues" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="_pullrequests" HelpText="Number of Pull Requests (Open + Closed)">Pull Requests: </Label>
-            </td>
-            <td>
-                <input id="_pullrequests" class="form-control" @bind="@_pullrequests" />
-            </td>
-        </tr>
-    </table>
-    <button type="button" class="btn btn-success" @onclick="Save">Save</button>
-    <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
-    <br />
-    <br />
-    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+<TabStrip>
+    <TabPanel Name="Project" Heading="Project">
+        <div class="container">
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_url" HelpText="Enter the Github Repository Url">Github Url: </Label>
+                <div class="col-sm-9">
+                    <input id="_url" class="form-control" @bind="@_url" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_title" HelpText="Enter the project title">Title: </Label>
+                <div class="col-sm-9">
+                    <input id="_title" class="form-control" @bind="@_title" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_description" HelpText="Enter the project description">Description: </Label>
+                <div class="col-sm-9">
+                    <textarea id="description" class="form-control" @bind="@_description" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_category" HelpText="Enter the project category">Category: </Label>
+                <div class="col-sm-9">
+                    <select id="_category" class="form-select" @bind="@_category">
+                        @foreach (var category in _categories)
+                        {
+                            <option value="@category.ToLower()">@category</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_isactive" HelpText="Specify if the project is active">Active? </Label>
+                <div class="col-sm-9">
+                    <select id="_isactive" class="form-select" @bind="@_isactive">
+                        <option value="True">Yes</option>
+                        <option value="False">No</option>
+                    </select>
+                </div>
+            </div
+        </div
+        <br /><br />
+        <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+    </TabPanel>
+    <TabPanel Name="Activity" Heading="Activity">
+        <div class="container">
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_date" HelpText="Date When Activity Metrics Were Recorded">Date: </Label>
+                <div class="col-sm-9">
+                    <input id="_date" class="form-control" @bind="@_date" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_watchers" HelpText="Number of Watchers">Watchers: </Label>
+                <div class="col-sm-9">
+                    <input id="_watchers" class="form-control" @bind="@_watchers" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_stars" HelpText="Number of Stars">Stars: </Label>
+                <div class="col-sm-9">
+                    <input id="_stars" class="form-control" @bind="@_stars" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_forks" HelpText="Number of Forks">Forks: </Label>
+                <div class="col-sm-9">
+                    <input id="_forks" class="form-control" @bind="@_forks" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_contributors" HelpText="Number of Contributors">Contributors: </Label>
+                <div class="col-sm-9">
+                    <input id="_contributors" class="form-control" @bind="@_contributors" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_commits" HelpText="Number of Commits">Commits: </Label>
+                <div class="col-sm-9">
+                    <input id="_commits" class="form-control" @bind="@_commits" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_issues" HelpText="Number of Issues (Open + Closed)">Issues: </Label>
+                <div class="col-sm-9">
+                    <input id="_issues" class="form-control" @bind="@_issues" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_pullrequests" HelpText="Number of Pull Requests (Open + Closed)">Pull Requests: </Label>
+                <div class="col-sm-9">
+                    <input id="_pullrequests" class="form-control" @bind="@_pullrequests" />
+                </div>
+            </div>
+        </div>
+    </TabPanel>
+</TabStrip>
+
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 }
 
 @code {
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
-    public override string Title => "Project Activity";
+    public override string Title => "Edit Project";
 
     bool _initialized = false;
     int _id;
@@ -206,8 +189,7 @@
                 await ProjectService.UpdateProjectAsync(Project);
                 await logger.LogInformation("Project Updated {Project}", Project);
 
-                DateTime date;
-                if (!string.IsNullOrEmpty(_date) && DateTime.TryParse(_date, out date))
+                if (!string.IsNullOrEmpty(_date) && DateTime.TryParse(_date, out DateTime date))
                 {
                     var activity = new ProjectActivity();
                     activity.ProjectId = Project.ProjectId;
@@ -219,7 +201,7 @@
                     activity.Commits = (string.IsNullOrEmpty(_commits) ? 0 : int.Parse(_commits));
                     activity.Issues = (string.IsNullOrEmpty(_issues) ? 0 : int.Parse(_issues));
                     activity.PullRequests = (string.IsNullOrEmpty(_pullrequests) ? 0 : int.Parse(_pullrequests));
-                    await ProjectService.AddProjectActivityAsync(activity, ModuleState.ModuleId);
+                    await ProjectActivityService.AddProjectActivityAsync(activity, ModuleState.ModuleId);
                     await logger.LogInformation("Project Activity Added {ProjectActivity}", activity);
                 }
 
