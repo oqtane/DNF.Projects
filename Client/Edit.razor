@@ -22,6 +22,12 @@
                 </div>
             </div>
             <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_package" HelpText="Enter the Nuget Package Name">Package Name: </Label>
+                <div class="col-sm-9">
+                    <input id="_package" class="form-control" @bind="@_package" />
+                </div>
+            </div>
+             <div class="row mb-1 align-items-center">
                 <Label Class="col-sm-3" For="_title" HelpText="Enter the project title">Title: </Label>
                 <div class="col-sm-9">
                     <input id="_title" class="form-control" @bind="@_title" />
@@ -107,6 +113,12 @@
                     <input id="_pullrequests" class="form-control" @bind="@_pullrequests" />
                 </div>
             </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_downloads" HelpText="Number of Package Downloads">Downloads: </Label>
+                <div class="col-sm-9">
+                    <input id="_downloads" class="form-control" @bind="@_downloads" />
+                </div>
+            </div>
         </div>
     </TabPanel>
 </TabStrip>
@@ -123,6 +135,7 @@
     bool _initialized = false;
     int _id;
     string _url;
+    string _package;
     string _title;
     string _description;
     string[] _categories;
@@ -136,6 +149,7 @@
     string _commits;
     string _issues;
     string _pullrequests;
+    string _downloads;
     string _createdby;
     DateTime _createdon;
     string _modifiedby;
@@ -153,6 +167,7 @@
             if (Project != null)
             {
                 _url = Project.Url;
+                _package = Project.Package;
                 _title = Project.Title;
                 _description = Project.Description;
                 if (_categories.Contains(Project.Category))
@@ -182,6 +197,7 @@
             if (!string.IsNullOrEmpty(_url) && _url.StartsWith(Common.UrlPrefix))
             {
                 Project.Url = _url;
+                Project.Package = _package;
                 Project.Title = Common.TruncateString(_title, 50);
                 Project.Description = Common.TruncateString(_description, 500);
                 Project.Category = Common.TruncateString(_category, 50);
@@ -201,6 +217,7 @@
                     activity.Commits = (string.IsNullOrEmpty(_commits) ? 0 : int.Parse(_commits));
                     activity.Issues = (string.IsNullOrEmpty(_issues) ? 0 : int.Parse(_issues));
                     activity.PullRequests = (string.IsNullOrEmpty(_pullrequests) ? 0 : int.Parse(_pullrequests));
+                    activity.Downloads = (string.IsNullOrEmpty(_downloads) ? 0 : int.Parse(_downloads));
                     await ProjectActivityService.AddProjectActivityAsync(activity, ModuleState.ModuleId);
                     await logger.LogInformation("Project Activity Added {ProjectActivity}", activity);
                 }

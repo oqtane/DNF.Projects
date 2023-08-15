@@ -17,7 +17,7 @@ namespace DNF.Projects.Services
 
         public async Task<List<Project>> GetProjectsAsync(int ModuleId)
         {
-            List<Project> Projects = await GetJsonAsync<List<Project>>(CreateAuthorizationPolicyUrl($"{ApiUrl}?moduleid={ModuleId}", EntityNames.Module, ModuleId));
+            List<Project> Projects = await GetJsonAsync<List<Project>>(CreateAuthorizationPolicyUrl($"{ApiUrl}?moduleid={ModuleId}", EntityNames.Module, ModuleId), Enumerable.Empty<Project>().ToList());
             return Projects.OrderBy(item => item.Url).ToList();
         }
 

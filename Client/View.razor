@@ -39,14 +39,15 @@
         {
             <Pager Items="@_ProjectActivity.OrderByDescending(item => item.Date)" DisplayPages="1">
                 <Header>
-                <th>Date</th>
-                <th>Watchers</th>
-                <th>Stars</th>
-                <th>Forks</th>
-                <th>Contributors</th>
-                <th>Commits</th>
-                <th>Issues</th>
-                <th>PRs</th>
+                    <th>Date</th>
+                    <th>Watchers</th>
+                    <th>Stars</th>
+                    <th>Forks</th>
+                    <th>Contributors</th>
+                    <th>Commits</th>
+                    <th>Issues</th>
+                    <th>PRs</th>
+                    <th>Downloads</th>
                 </Header>
                 <Row>
                     <td>@(context.Date.ToString("MMM-dd-yyyy"))</td>
@@ -57,6 +58,7 @@
                     <td>@(context.Commits)</td>
                     <td>@(context.Issues)</td>
                     <td>@(context.PullRequests)</td>
+                    <td>@(context.Downloads)</td>
                 </Row>
             </Pager>
         }
@@ -153,8 +155,8 @@
 
             if (_refresh)
             {
-                string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests" };
-                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF" };
+                string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests", "Downloads" };
+                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF" };
 
                 // pivot data for chart
                 List<string> labels = new List<string>();
@@ -173,6 +175,7 @@
                     data["Commits"].Add(activity.Commits);
                     data["Issues"].Add(activity.Issues);
                     data["PullRequests"].Add(activity.PullRequests);
+                    data["Downloads"].Add(activity.Downloads);
                 }
 
                 int index = -1;

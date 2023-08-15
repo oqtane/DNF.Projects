@@ -185,6 +185,35 @@ namespace DNF.Projects.Jobs
                             log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
                         }
 
+                        // get downloads
+                        if (!string.IsNullOrEmpty(project.Package))
+                        {
+                            try
+                            {
+                                client = new RestClient("https://azuresearch-usnc.nuget.org/");
+                                request = new RestRequest("query?q=" + project.Package);
+                                response = client.Execute(request);
+                                jObject = JsonNode.Parse(response.Content).AsObject();
+                                if (jObject != null)
+                                {
+                                    jArray = jObject["data"].AsArray();
+                                    foreach (System.Text.Json.Nodes.JsonObject data in jArray)
+                                    {
+                                        if (data["id"].ToString().ToLower() == project.Package.ToLower())
+                                        {
+                                            activity.Downloads = int.Parse(data["totalDownloads"].ToString());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                error = true;
+                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                            }
+                        }
+
                         projectActivityRepository.AddProjectActivity(activity);
 
                         if (error && settings.ContainsKey("NotifyName") && settings.ContainsKey("NotifyEmail"))

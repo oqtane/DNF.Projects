@@ -11,6 +11,7 @@ namespace DNF.Projects.Models
         public int ModuleId { get; set; }
         public int SiteId { get; set; }
 		public string Url { get; set; }
+        public string Package { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
@@ -32,6 +33,8 @@ namespace DNF.Projects.Models
         public int Issues { get; set; }
         [NotMapped]
         public int PullRequests { get; set; }
+        [NotMapped]
+        public int Downloads { get; set; }
 
     }
 }

@@ -41,6 +41,7 @@
                         <option value="commit">Commits</option>
                         <option value="issue">Issues</option>
                         <option value="pr">Pull Requests</option>
+                        <option value="download">Downloads</option>
                     </select>
                 </div>
             </div>
@@ -118,6 +119,9 @@
                                     break;
                                 case "pr":
                                     @context.PullRequests
+                                    break;
+                                case "download":
+                                    @context.Downloads
                                     break;
                             }
                         </td>
@@ -204,6 +208,7 @@
                         project.Commits = 0;
                         project.Issues = 0;
                         project.PullRequests = 0;
+                        project.Downloads = 0;
 
                         var projectactivity = ProjectActivity.Where(item => item.ProjectId == project.ProjectId);
                         if (projectactivity.Any())
@@ -216,6 +221,7 @@
                             project.Commits = projectactivity.Last().Commits - projectactivity.First().Commits;
                             project.Issues = projectactivity.Last().Issues - projectactivity.First().Issues;
                             project.PullRequests = projectactivity.Last().PullRequests - projectactivity.First().PullRequests;
+                            project.Downloads = projectactivity.Last().Downloads - projectactivity.First().Downloads;
                         }
                     }
                     switch (_metric)
@@ -240,6 +246,9 @@
                             break;
                         case "pr":
                             _Projects = _Projects.OrderByDescending(item => item.PullRequests).ToList();
+                            break;
+                        case "download":
+                            _Projects = _Projects.OrderByDescending(item => item.Downloads).ToList();
                             break;
                     }
                 }
@@ -330,6 +339,9 @@
                         case "pr":
                             values.Add(_Projects[i].PullRequests);
                             break;
+                        case "download":
+                            values.Add(_Projects[i].Downloads);
+                            break;
                     }
                 }
                 datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor = colors });
@@ -380,6 +392,8 @@
                 return "Issues";
             case "pr":
                 return "Pull Requests";
+            case "download":
+                return "Downloads";
         }
         return "";
     }

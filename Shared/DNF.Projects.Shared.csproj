@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Oqtane.Shared" Version="4.0.0" />
+    <PackageReference Include="Oqtane.Shared" Version="4.0.2" />
   </ItemGroup>
 
 </Project>

@@ -16,6 +16,7 @@ namespace DNF.Projects.Models
         public int Commits { get; set; }
         public int Issues { get; set; }
         public int PullRequests { get; set; }
+        public int Downloads { get; set; }
 
         public Project Project { get; set; }
     }

@@ -74,6 +74,7 @@ namespace DNF.Projects.Manager
                         _Project.ModuleId = module.ModuleId;
                         _Project.SiteId = module.SiteId;
                         _Project.Url = Project.Url;
+                        _Project.Package = Project.Package;
                         _Project.Title = Common.TruncateString(Project.Title, 50);
                         _Project.Description = Common.TruncateString(Project.Description, 500);
                         _Project.Category = Common.TruncateString(Project.Category, 50);
@@ -92,6 +93,7 @@ namespace DNF.Projects.Manager
                         activity.Commits = Project.Commits;
                         activity.Issues = Project.Issues;
                         activity.PullRequests = Project.PullRequests;
+                        activity.Downloads = Project.Downloads;
                         _ProjectActivityRepository.AddProjectActivity(activity);
                     }
                 }
