@@ -201,8 +201,11 @@ namespace DNF.Projects.Jobs
                                     {
                                         if (data["id"].ToString().ToLower() == project.Package.ToLower())
                                         {
-                                            activity.Downloads = int.Parse(data["totalDownloads"].ToString());
-                                            break;
+                                            if (int.TryParse(data["totalDownloads"].ToString(), out int downloads))
+                                            {
+                                                activity.Downloads = downloads;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
