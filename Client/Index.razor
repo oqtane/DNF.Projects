@@ -196,6 +196,7 @@
             _link = "";
             if (_Projects != null && _Projects.Count != 0)
             {
+                ProjectActivity first;
                 List<ProjectActivity> ProjectActivity = await ProjectActivityService.GetProjectActivityAsync(-1, _from.Date, _to.Date, ModuleState.ModuleId);
                 if (ProjectActivity != null)
                 {
@@ -214,14 +215,23 @@
                         if (projectactivity.Any())
                         {
                             projectactivity = projectactivity.OrderBy(item => item.Date);
-                            project.Watchers = projectactivity.Last().Watchers - projectactivity.First().Watchers;
-                            project.Stars = projectactivity.Last().Stars - projectactivity.First().Stars;
-                            project.Forks = projectactivity.Last().Forks - projectactivity.First().Forks;
-                            project.Contributors = projectactivity.Last().Contributors - projectactivity.First().Contributors;
-                            project.Commits = projectactivity.Last().Commits - projectactivity.First().Commits;
-                            project.Issues = projectactivity.Last().Issues - projectactivity.First().Issues;
-                            project.PullRequests = projectactivity.Last().PullRequests - projectactivity.First().PullRequests;
-                            project.Downloads = projectactivity.Last().Downloads - projectactivity.First().Downloads;
+
+                            first = projectactivity.FirstOrDefault(item => item.Watchers > 0);
+                            project.Watchers = projectactivity.Last().Watchers - ((first != null) ? first.Watchers : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Stars > 0);
+                            project.Stars = projectactivity.Last().Stars - ((first != null) ? first.Stars : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Forks > 0);
+                            project.Forks = projectactivity.Last().Forks - ((first != null) ? first.Forks : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Contributors > 0);
+                            project.Contributors = projectactivity.Last().Contributors - ((first != null) ? first.Contributors : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Commits > 0);
+                            project.Commits = projectactivity.Last().Commits - ((first != null) ? first.Commits : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Issues > 0);
+                            project.Issues = projectactivity.Last().Issues - ((first != null) ? first.Issues : 0);
+                            first = projectactivity.FirstOrDefault(item => item.PullRequests > 0);
+                            project.PullRequests = projectactivity.Last().PullRequests - ((first != null) ? first.PullRequests : 0);
+                            first = projectactivity.FirstOrDefault(item => item.Downloads > 0);
+                            project.Downloads = projectactivity.Last().Downloads - ((first != null) ? first.Downloads : 0);
                         }
                     }
                     switch (_metric)
