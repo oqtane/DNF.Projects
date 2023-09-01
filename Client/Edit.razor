@@ -170,7 +170,7 @@
                 _package = Project.Package;
                 _title = Project.Title;
                 _description = Project.Description;
-                if (_categories.Contains(Project.Category))
+                if (_categories.Contains(Project.Category, StringComparer.OrdinalIgnoreCase))
                 {
                     _category = Project.Category;
                 }
@@ -200,7 +200,7 @@
                 Project.Package = _package;
                 Project.Title = Common.TruncateString(_title, 50);
                 Project.Description = Common.TruncateString(_description, 500);
-                Project.Category = Common.TruncateString(_category, 50);
+                Project.Category = _category;
                 Project.IsActive = bool.Parse(_isactive);
                 await ProjectService.UpdateProjectAsync(Project);
                 await logger.LogInformation("Project Updated {Project}", Project);
