@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Version>1.0.6</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <Version>1.0.7</Version>
     <Authors>Shaun Walker</Authors>
     <Company>.NET Foundation</Company>
     <Description></Description>
@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
-	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
-	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="7.0.5" />
-	<PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.5" />
-	<PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.0" />
+	<PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Localization" Version="2.2.0" />
   </ItemGroup>
 
@@ -25,8 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Oqtane.Client" Version="4.0.2" />
-    <PackageReference Include="Oqtane.Shared" Version="4.0.2" />
+    <PackageReference Include="Oqtane.Client" Version="5.0.0" />
+    <PackageReference Include="Oqtane.Shared" Version="5.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
