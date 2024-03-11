@@ -26,10 +26,10 @@ namespace DNF.Projects.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            var projectEntityBuilder = new ProjectEntityBuilder(migrationBuilder, ActiveDatabase);
-            projectEntityBuilder.Drop();
-
             var projectActivityEntityBuilder = new ProjectActivityEntityBuilder(migrationBuilder, ActiveDatabase);
+            projectActivityEntityBuilder.Drop();
+
+            var projectEntityBuilder = new ProjectEntityBuilder(migrationBuilder, ActiveDatabase);
             projectEntityBuilder.Drop();
         }
     }
