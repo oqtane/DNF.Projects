@@ -30,6 +30,7 @@ namespace DNF.Projects.Jobs
         public override string ExecuteJob(IServiceProvider provider)
         {
             string log = "";
+            int restrequests = 0;
             int searchrequests = 0;
 
             // get services which require tenant resolution
@@ -97,11 +98,12 @@ namespace DNF.Projects.Jobs
                             activity.Stars = int.Parse(jObject["stargazers_count"].ToString());
                             activity.Forks = int.Parse(jObject["forks_count"].ToString());
                             activity.Watchers = int.Parse(jObject["subscribers_count"].ToString());
+                            restrequests += 1;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString();
                         }
 
                         // get contributors, commits
@@ -129,6 +131,7 @@ namespace DNF.Projects.Jobs
                                 {
                                     Page = -1;
                                 }
+                                restrequests += 1;
                             }
                             activity.Contributors = contributors;
                             activity.Commits = commits;
@@ -136,7 +139,7 @@ namespace DNF.Projects.Jobs
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString();
                         }
 
                         // get issues
@@ -155,11 +158,12 @@ namespace DNF.Projects.Jobs
                             activity.Issues += int.Parse(jObject["total_count"].ToString());
 
                             searchrequests += 2;
+                            restrequests += 2;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString() + " Search Requests: " + searchrequests.ToString();
                         }
 
                         // get pull requests
@@ -178,11 +182,12 @@ namespace DNF.Projects.Jobs
                             activity.PullRequests += int.Parse(jObject["total_count"].ToString());
 
                             searchrequests += 2;
+                            restrequests += 2;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString() + " Search Requests: " + searchrequests.ToString();
                         }
 
                         // get downloads
@@ -225,7 +230,7 @@ namespace DNF.Projects.Jobs
                             notificationRepository.AddNotification(notification);
                         }
 
-                        log += " - Succeeded";
+                        log += " - Succeeded (" + DateTime.UtcNow.ToString("HH:mm:ss:fff") + ")";
                     }
                     else
                     {
