@@ -30,8 +30,8 @@ namespace DNF.Projects.Jobs
         public override string ExecuteJob(IServiceProvider provider)
         {
             string log = "";
-            int restrequests = 0;
-            int searchrequests = 0;
+            int restRequests = 0;
+            int searchRequests = 0;
 
             // get services which require tenant resolution
             var siteRepository = provider.GetRequiredService<ISiteRepository>();
@@ -54,13 +54,6 @@ namespace DNF.Projects.Jobs
                     Dictionary<string, string> settings = GetSettings(modulesettings);
                     if (settings.ContainsKey("GithubToken"))
                     {
-                        // search rate limit ( 30 requests per minute )
-                        if (searchrequests == 28)
-                        {
-                            Thread.Sleep(60 * 1000); // 60 seconds
-                            searchrequests = 0;
-                        }
-
                         string resource = project.Url.Replace(Common.UrlPrefix, "");
 
                         var activity = new ProjectActivity();
@@ -91,6 +84,7 @@ namespace DNF.Projects.Jobs
                         // get stars, forks, watchers
                         try
                         {
+                            restRequests = ThrottleRestRequests(restRequests);
                             request = new RestRequest("repos/" + resource);
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
@@ -98,12 +92,11 @@ namespace DNF.Projects.Jobs
                             activity.Stars = int.Parse(jObject["stargazers_count"].ToString());
                             activity.Forks = int.Parse(jObject["forks_count"].ToString());
                             activity.Watchers = int.Parse(jObject["subscribers_count"].ToString());
-                            restrequests += 1;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString();
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
                         }
 
                         // get contributors, commits
@@ -114,6 +107,7 @@ namespace DNF.Projects.Jobs
                             int Page = 1;
                             while (Page != -1)
                             {
+                                restRequests += ThrottleRestRequests(restRequests);
                                 request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
                                 request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                                 response = client.Execute(request);
@@ -131,7 +125,6 @@ namespace DNF.Projects.Jobs
                                 {
                                     Page = -1;
                                 }
-                                restrequests += 1;
                             }
                             activity.Contributors = contributors;
                             activity.Commits = commits;
@@ -139,55 +132,75 @@ namespace DNF.Projects.Jobs
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString();
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
                         }
 
-                        // get issues
+                        // get open issues
                         try
                         {
+                            restRequests = ThrottleRestRequests(restRequests);
+                            searchRequests = ThrottleSearchRequests(searchRequests);
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:open");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JsonNode.Parse(response.Content).AsObject();
                             activity.Issues = int.Parse(jObject["total_count"].ToString());
-
-                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
-                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
-                            response = client.Execute(request);
-                            jObject = JsonNode.Parse(response.Content).AsObject();
-                            activity.Issues += int.Parse(jObject["total_count"].ToString());
-
-                            searchrequests += 2;
-                            restrequests += 2;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString() + " Search Requests: " + searchrequests.ToString();
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
                         }
 
-                        // get pull requests
+                        // get closed issues
                         try
                         {
+                            restRequests = ThrottleRestRequests(restRequests);
+                            searchRequests = ThrottleSearchRequests(searchRequests);
+                            request = new RestRequest("search/issues?q=repo:" + resource + "+type:issue+state:closed");
+                            request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
+                            response = client.Execute(request);
+                            jObject = JsonNode.Parse(response.Content).AsObject();
+                            activity.Issues = int.Parse(jObject["total_count"].ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            error = true;
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
+                        }
+
+                        // get open pull requests
+                        try
+                        {
+                            restRequests = ThrottleRestRequests(restRequests);
+                            searchRequests = ThrottleSearchRequests(searchRequests);
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:open");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JsonNode.Parse(response.Content).AsObject();
                             activity.PullRequests = int.Parse(jObject["total_count"].ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            error = true;
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
+                        }
 
+                        // get closed pull requests
+                        try
+                        {
+                            restRequests = ThrottleRestRequests(restRequests);
+                            searchRequests = ThrottleSearchRequests(searchRequests);
                             request = new RestRequest("search/issues?q=repo:" + resource + "+type:pr+state:closed");
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JsonNode.Parse(response.Content).AsObject();
                             activity.PullRequests += int.Parse(jObject["total_count"].ToString());
-
-                            searchrequests += 2;
-                            restrequests += 2;
                         }
                         catch (Exception ex)
                         {
                             error = true;
-                            log += "<br /> Url: " + request.Resource + " Error: " + ex.Message + " REST Requests: " + restrequests.ToString() + " Search Requests: " + searchrequests.ToString();
+                            log += " - Error: " + request.Resource + " - " + ex.Message;
                         }
 
                         // get downloads
@@ -218,7 +231,7 @@ namespace DNF.Projects.Jobs
                             catch (Exception ex)
                             {
                                 error = true;
-                                log += "<br /> Url: " + request.Resource + " Error: " + ex.Message;
+                                log += " - Error: " + request.Resource + " - " + ex.Message;
                             }
                         }
 
@@ -230,7 +243,7 @@ namespace DNF.Projects.Jobs
                             notificationRepository.AddNotification(notification);
                         }
 
-                        log += " - Succeeded (" + DateTime.UtcNow.ToString("HH:mm:ss:fff") + ")";
+                        log += " - Succeeded (REST API: " + restRequests.ToString() + ", Search API: " + searchRequests.ToString() + ", Time: " + DateTime.UtcNow.ToString("HH:mm:ss:fff") + ")";
                     }
                     else
                     {
@@ -243,6 +256,25 @@ namespace DNF.Projects.Jobs
             return log;
         }
 
+        private int ThrottleRestRequests(int restRequests)
+        {
+            // request rate limit ( 200 requests per minute )
+            if (restRequests % 200 == 0)
+            {
+                Thread.Sleep(60 * 1000); // 60 seconds
+            }
+            return restRequests + 1;
+        }
+
+        private int ThrottleSearchRequests(int searchRequests)
+        {
+            // request rate limit ( 30 requests per minute )
+            if (searchRequests % 30 == 0)
+            {
+                Thread.Sleep(60 * 1000); // 60 seconds
+            }
+            return searchRequests + 1;
+        }
 
         private Dictionary<string, string> GetSettings(List<Setting> settings)
         {
