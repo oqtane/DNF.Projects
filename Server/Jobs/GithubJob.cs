@@ -107,7 +107,7 @@ namespace DNF.Projects.Jobs
                             int Page = 1;
                             while (Page != -1)
                             {
-                                restRequests += ThrottleRestRequests(restRequests);
+                                restRequests = ThrottleRestRequests(restRequests);
                                 request = new RestRequest("repos/" + resource + "/contributors?anon=true&per_page=100&page=" + Page.ToString());
                                 request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                                 response = client.Execute(request);
