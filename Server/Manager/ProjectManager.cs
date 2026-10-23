@@ -91,7 +91,8 @@ namespace DNF.Projects.Manager
                         activity.Forks = Project.Forks;
                         activity.Contributors = Project.Contributors;
                         activity.Commits = Project.Commits;
-                        activity.Issues = Project.Issues;
+                        activity.ClosedIssues = Project.ClosedIssues;
+                        activity.OpenIssues = Project.OpenIssues;
                         activity.PullRequests = Project.PullRequests;
                         activity.Downloads = Project.Downloads;
                         _ProjectActivityRepository.AddProjectActivity(activity);

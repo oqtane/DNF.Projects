@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Oqtane.Models;
 
 namespace DNF.Projects.Models
@@ -30,7 +31,24 @@ namespace DNF.Projects.Models
         [NotMapped]
         public int Commits { get; set; }
         [NotMapped]
-        public int Issues { get; set; }
+        public int ClosedIssues { get; set; }
+        [NotMapped]
+        public int? OpenIssues { get; set; }
+        // Accept legacy snapshots without emitting the ambiguous Issues name.
+        [NotMapped]
+        [JsonPropertyName("Issues")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? LegacyIssues
+        {
+            get => null;
+            set
+            {
+                if (value.HasValue)
+                {
+                    ClosedIssues = value.Value;
+                }
+            }
+        }
         [NotMapped]
         public int PullRequests { get; set; }
         [NotMapped]

@@ -102,9 +102,15 @@
                 </div>
             </div>
             <div class="row mb-1 align-items-center">
-                <Label Class="col-sm-3" For="_issues" HelpText="Number of Issues (Open + Closed)">Issues: </Label>
+                <Label Class="col-sm-3" For="_closedissues" HelpText="Number of Closed Issues">Closed Issues: </Label>
                 <div class="col-sm-9">
-                    <input id="_issues" class="form-control" @bind="@_issues" />
+                    <input id="_closedissues" class="form-control" @bind="@_closedissues" />
+                </div>
+            </div>
+            <div class="row mb-1 align-items-center">
+                <Label Class="col-sm-3" For="_openissues" HelpText="Number of Open Issues (Leave Blank If Unknown)">Open Issues: </Label>
+                <div class="col-sm-9">
+                    <input id="_openissues" class="form-control" @bind="@_openissues" />
                 </div>
             </div>
             <div class="row mb-1 align-items-center">
@@ -147,7 +153,8 @@
     string _forks;
     string _contributors;
     string _commits;
-    string _issues;
+    string _closedissues;
+    string _openissues;
     string _pullrequests;
     string _downloads;
     string _createdby;
@@ -215,7 +222,8 @@
                     activity.Forks = (string.IsNullOrEmpty(_forks) ? 0 : int.Parse(_forks));
                     activity.Contributors = (string.IsNullOrEmpty(_contributors) ? 0 : int.Parse(_contributors));
                     activity.Commits = (string.IsNullOrEmpty(_commits) ? 0 : int.Parse(_commits));
-                    activity.Issues = (string.IsNullOrEmpty(_issues) ? 0 : int.Parse(_issues));
+                    activity.ClosedIssues = (string.IsNullOrEmpty(_closedissues) ? 0 : int.Parse(_closedissues));
+                    activity.OpenIssues = (string.IsNullOrEmpty(_openissues) ? (int?)null : int.Parse(_openissues));
                     activity.PullRequests = (string.IsNullOrEmpty(_pullrequests) ? 0 : int.Parse(_pullrequests));
                     activity.Downloads = (string.IsNullOrEmpty(_downloads) ? 0 : int.Parse(_downloads));
                     await ProjectActivityService.AddProjectActivityAsync(activity, ModuleState.ModuleId);
