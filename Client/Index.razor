@@ -39,7 +39,8 @@
                         <option value="fork">Forks</option>
                         <option value="contributor">Contributors</option>
                         <option value="commit">Commits</option>
-                        <option value="issue">Issues</option>
+                        <option value="closedissue">Closed Issues</option>
+                        <option value="openissue">Open Issues</option>
                         <option value="pr">Pull Requests</option>
                         <option value="download">Downloads</option>
                     </select>
@@ -114,8 +115,11 @@
                                 case "commit":
                                     @context.Commits
                                     break;
-                                case "issue":
-                                    @context.Issues
+                                case "closedissue":
+                                    @context.ClosedIssues
+                                    break;
+                                case "openissue":
+                                    @(context.OpenIssues?.ToString() ?? "-")
                                     break;
                                 case "pr":
                                     @context.PullRequests
@@ -207,7 +211,8 @@
                         project.Forks = 0;
                         project.Contributors = 0;
                         project.Commits = 0;
-                        project.Issues = 0;
+                        project.ClosedIssues = 0;
+                        project.OpenIssues = null;
                         project.PullRequests = 0;
                         project.Downloads = 0;
 
@@ -226,8 +231,10 @@
                             project.Contributors = projectactivity.Last().Contributors - ((first != null) ? first.Contributors : 0);
                             first = projectactivity.FirstOrDefault(item => item.Commits > 0);
                             project.Commits = projectactivity.Last().Commits - ((first != null) ? first.Commits : 0);
-                            first = projectactivity.FirstOrDefault(item => item.Issues > 0);
-                            project.Issues = projectactivity.Last().Issues - ((first != null) ? first.Issues : 0);
+                            first = projectactivity.FirstOrDefault(item => item.ClosedIssues > 0);
+                            project.ClosedIssues = projectactivity.Last().ClosedIssues - ((first != null) ? first.ClosedIssues : 0);
+                            first = projectactivity.FirstOrDefault(item => item.OpenIssues.HasValue);
+                            project.OpenIssues = projectactivity.Last().OpenIssues - first?.OpenIssues;
                             first = projectactivity.FirstOrDefault(item => item.PullRequests > 0);
                             project.PullRequests = projectactivity.Last().PullRequests - ((first != null) ? first.PullRequests : 0);
                             first = projectactivity.FirstOrDefault(item => item.Downloads > 0);
@@ -251,8 +258,11 @@
                         case "commit":
                             _Projects = _Projects.OrderByDescending(item => item.Commits).ToList();
                             break;
-                        case "issue":
-                            _Projects = _Projects.OrderByDescending(item => item.Issues).ToList();
+                        case "closedissue":
+                            _Projects = _Projects.OrderByDescending(item => item.ClosedIssues).ToList();
+                            break;
+                        case "openissue":
+                            _Projects = _Projects.OrderByDescending(item => item.OpenIssues).ToList();
                             break;
                         case "pr":
                             _Projects = _Projects.OrderByDescending(item => item.PullRequests).ToList();
@@ -319,7 +329,7 @@
             if (_refresh)
             {
                 List<string> labels = new List<string>();
-                List<int> values = new List<int>();
+                List<int?> values = new List<int?>();
                 List<object> datasets = new List<object>();
                 string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#CCCCCC" };
 
@@ -343,8 +353,11 @@
                         case "commit":
                             values.Add(_Projects[i].Commits);
                             break;
-                        case "issue":
-                            values.Add(_Projects[i].Issues);
+                        case "closedissue":
+                            values.Add(_Projects[i].ClosedIssues);
+                            break;
+                        case "openissue":
+                            values.Add(_Projects[i].OpenIssues);
                             break;
                         case "pr":
                             values.Add(_Projects[i].PullRequests);
@@ -354,11 +367,36 @@
                             break;
                     }
                 }
-                datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor = colors });
-                object options = new { maintainAspectRatio = false, legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } } };
+                bool useBarChart = _metric == "openissue" || _metric == "closedissue";
+                object backgroundColor = useBarChart ? colors[0] : colors;
+                datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor });
+                var legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } };
+                object options = new { maintainAspectRatio = false, legend };
+                string chartType = "doughnut";
+                if (useBarChart)
+                {
+                    chartType = "bar";
+                    options = new
+                    {
+                        maintainAspectRatio = false,
+                        legend,
+                        scales = new
+                        {
+                            xAxes = new[] { new { ticks = new { fontColor = "white" } } },
+                            yAxes = new[]
+                            {
+                                new
+                                {
+                                    ticks = new { beginAtZero = true, fontColor = "white" },
+                                    gridLines = new { zeroLineColor = "white", zeroLineWidth = 2 }
+                                }
+                            }
+                        }
+                    };
+                }
 
                 var interop = new Interop(JSRuntime);
-                await interop.CreateChart("chart", "doughnut", labels.ToArray(), datasets.ToArray(), options);
+                await interop.CreateChart("chart", chartType, labels.ToArray(), datasets.ToArray(), options);
 
                 _refresh = false;
             }
@@ -398,8 +436,10 @@
                 return "Contributors";
             case "commit":
                 return "Commits";
-            case "issue":
-                return "Issues";
+            case "closedissue":
+                return "Closed Issues";
+            case "openissue":
+                return "Open Issues";
             case "pr":
                 return "Pull Requests";
             case "download":
@@ -452,6 +492,10 @@
         if (PageState.QueryString.ContainsKey("metric") && !string.IsNullOrEmpty(PageState.QueryString["metric"]))
         {
             _metric = PageState.QueryString["metric"].ToLower();
+        }
+        if (_metric == "issue")
+        {
+            _metric = "closedissue";
         }
     }
 

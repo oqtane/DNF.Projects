@@ -69,7 +69,8 @@ namespace DNF.Projects.Jobs
                             activity.Watchers = yesterday.Watchers;
                             activity.Contributors = yesterday.Contributors;
                             activity.Commits = yesterday.Commits;
-                            activity.Issues = yesterday.Issues;
+                            activity.ClosedIssues = yesterday.ClosedIssues;
+                            activity.OpenIssues = yesterday.OpenIssues;
                             activity.PullRequests = yesterday.PullRequests;
                         }
 
@@ -144,7 +145,7 @@ namespace DNF.Projects.Jobs
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JsonNode.Parse(response.Content).AsObject();
-                            activity.Issues = int.Parse(jObject["total_count"].ToString());
+                            activity.OpenIssues = int.Parse(jObject["total_count"].ToString());
                         }
                         catch (Exception ex)
                         {
@@ -161,7 +162,7 @@ namespace DNF.Projects.Jobs
                             request.AddHeader("Authorization", "Bearer " + settings["GithubToken"]);
                             response = client.Execute(request);
                             jObject = JsonNode.Parse(response.Content).AsObject();
-                            activity.Issues = int.Parse(jObject["total_count"].ToString());
+                            activity.ClosedIssues = int.Parse(jObject["total_count"].ToString());
                         }
                         catch (Exception ex)
                         {

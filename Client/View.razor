@@ -51,7 +51,8 @@
                     <th>Forks</th>
                     <th>Contributors</th>
                     <th>Commits</th>
-                    <th>Issues</th>
+                    <th>Closed Issues</th>
+                    <th>Open Issues</th>
                     <th>PRs</th>
                     <th>Downloads</th>
                 </Header>
@@ -62,7 +63,8 @@
                     <td>@(context.Forks)</td>
                     <td>@(context.Contributors)</td>
                     <td>@(context.Commits)</td>
-                    <td>@(context.Issues)</td>
+                    <td>@(context.ClosedIssues)</td>
+                    <td>@(context.OpenIssues?.ToString() ?? "-")</td>
                     <td>@(context.PullRequests)</td>
                     <td>@(context.Downloads)</td>
                 </Row>
@@ -165,15 +167,15 @@
 
             if (_refresh)
             {
-                string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Issues", "PullRequests", "Downloads" };
-                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#0000FF", "#8000FF" };
+                string[] metrics = new string[] { "Watchers", "Stars", "Forks", "Contributors", "Commits", "Closed Issues", "Open Issues", "Pull Requests", "Downloads" };
+                string[] colors = new string[] { "#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#00FFFF", "#0080FF", "#FF00FF", "#0000FF", "#8000FF" };
 
                 // pivot data for chart
                 List<string> labels = new List<string>();
-                Dictionary<string, List<int>> data = new Dictionary<string, List<int>>();
+                Dictionary<string, List<int?>> data = new Dictionary<string, List<int?>>();
                 foreach (string metric in metrics)
                 {
-                    data.Add(metric, new List<int>());
+                    data.Add(metric, new List<int?>());
                 }
                 foreach (var activity in _ProjectActivity.OrderBy(item => item.Date).ToList())
                 {
@@ -183,8 +185,9 @@
                     data["Forks"].Add(activity.Forks);
                     data["Contributors"].Add(activity.Contributors);
                     data["Commits"].Add(activity.Commits);
-                    data["Issues"].Add(activity.Issues);
-                    data["PullRequests"].Add(activity.PullRequests);
+                    data["Closed Issues"].Add(activity.ClosedIssues);
+                    data["Open Issues"].Add(activity.OpenIssues);
+                    data["Pull Requests"].Add(activity.PullRequests);
                     data["Downloads"].Add(activity.Downloads);
                 }
 
