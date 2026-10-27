@@ -17,15 +17,23 @@ namespace DNF.Projects.Migrations
 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn("Issues", "DNFProjectActivity", "ClosedIssues");
+            migrationBuilder.RenameColumn(
+                name: RewriteName("Issues"),
+                table: RewriteName("DNFProjectActivity"),
+                newName: RewriteName("ClosedIssues"));
             var projectActivityEntityBuilder = new ProjectActivityEntityBuilder(migrationBuilder, ActiveDatabase);
             projectActivityEntityBuilder.AddIntegerColumn("OpenIssues", true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn("OpenIssues", "DNFProjectActivity");
-            migrationBuilder.RenameColumn("ClosedIssues", "DNFProjectActivity", "Issues");
+            migrationBuilder.DropColumn(
+                name: RewriteName("OpenIssues"),
+                table: RewriteName("DNFProjectActivity"));
+            migrationBuilder.RenameColumn(
+                name: RewriteName("ClosedIssues"),
+                table: RewriteName("DNFProjectActivity"),
+                newName: RewriteName("Issues"));
         }
     }
 }

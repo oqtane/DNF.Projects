@@ -367,11 +367,36 @@
                             break;
                     }
                 }
-                datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor = colors });
-                object options = new { maintainAspectRatio = false, legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } } };
+                bool useBarChart = _metric == "openissue" || _metric == "closedissue";
+                object backgroundColor = useBarChart ? colors[0] : colors;
+                datasets.Add(new { label = FormatMetric(_metric), data = values.ToArray(), fill = false, backgroundColor });
+                var legend = new { display = true, position = "bottom", labels = new { fontColor = "white", fontSize = 16 } };
+                object options = new { maintainAspectRatio = false, legend };
+                string chartType = "doughnut";
+                if (useBarChart)
+                {
+                    chartType = "bar";
+                    options = new
+                    {
+                        maintainAspectRatio = false,
+                        legend,
+                        scales = new
+                        {
+                            xAxes = new[] { new { ticks = new { fontColor = "white" } } },
+                            yAxes = new[]
+                            {
+                                new
+                                {
+                                    ticks = new { beginAtZero = true, fontColor = "white" },
+                                    gridLines = new { zeroLineColor = "white", zeroLineWidth = 2 }
+                                }
+                            }
+                        }
+                    };
+                }
 
                 var interop = new Interop(JSRuntime);
-                await interop.CreateChart("chart", "doughnut", labels.ToArray(), datasets.ToArray(), options);
+                await interop.CreateChart("chart", chartType, labels.ToArray(), datasets.ToArray(), options);
 
                 _refresh = false;
             }
